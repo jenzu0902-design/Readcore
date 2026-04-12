@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>READCORE</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Apple+SD+Gothic+Neo:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f2f2f7;--card:#ffffff;--card2:#f9f9fb;
+  --t:#1c1c1e;--t2:#3a3a3c;--t3:#8e8e93;--t4:#aeaeb2;
+  --brd:#e5e5ea;--brd2:#d1d1d6;
+  --blue:#007aff;--green:#34c759;--red:#ff3b30;--orange:#ff9500;--purple:#af52de;--teal:#5ac8fa;
+  --accent:#007aff;
+  --serif:'Noto Serif KR',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Apple SD Gothic Neo',sans-serif;
+  --radius:16px;--radius-s:10px;--radius-xs:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column;max-width:680px;margin:0 auto}
+
+/* 헤더 */
+.hd{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;background:rgba(242,242,247,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:sticky;top:0;z-index:200;border-bottom:1px solid var(--brd)}
+.hd-logo{font-size:19px;font-weight:700;letter-spacing:-.5px;color:var(--t)}
+.hd-logo span{color:var(--blue)}
+.hd-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.hd-btn{background:none;border:none;color:var(--blue);font-family:var(--sans);font-size:15px;cursor:pointer;padding:4px 0}
+
+/* 메인 */
+main{flex:1;padding:16px 16px 80px}
+
+/* 화면 전환 */
+.sc{display:none}.sc.on{display:block}
+
+/* 카드 */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
+.card-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);margin-bottom:14px}
+
+/* 세그먼트 탭 */
+.seg{display:flex;background:rgba(118,118,128,.12);border-radius:10px;padding:2px;margin-bottom:18px}
+.seg-btn{flex:1;padding:7px 4px;border:none;background:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .2s}
+.seg-btn.on{background:var(--card);color:var(--t);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08)}
+
+/* 칩 */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{padding:6px 13px;border-radius:20px;border:1.5px solid var(--brd2);background:transparent;color:var(--t2);font-size:13px;font-family:var(--sans);cursor:pointer;font-weight:500;transition:all .15s}
+.chip.on{border-color:var(--blue);color:var(--blue);background:rgba(0,122,255,.08);font-weight:600}
+.section-label{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin:14px 0 8px}
+
+/* 기호 가이드 박스 */
+.sym-guide{background:var(--card2);border-radius:var(--radius-s);padding:14px 16px;margin-bottom:16px;border:1px solid var(--brd)}
+.sym-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.sym-row:last-child{margin-bottom:0}
+.sym-ico{font-size:18px;min-width:28px;text-align:center;line-height:1.4}
+.sym-name{font-size:13px;font-weight:700;min-width:58px;color:var(--t)}
+.sym-desc{font-size:13px;color:var(--t2);line-height:1.5}
+.sym-ex{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* 인포박스 */
+.infobox{background:rgba(0,122,255,.06);border:1.5px solid rgba(0,122,255,.15);border-radius:var(--radius-s);padding:13px 15px;font-size:14px;color:var(--t2);line-height:1.8;margin-bottom:16px}
+.infobox strong{color:var(--t)}
+
+/* 버튼 */
+.btn{width:100%;padding:15px;border-radius:var(--radius-s);background:var(--blue);color:#fff;font-family:var(--sans);font-size:16px;font-weight:600;border:none;cursor:pointer;letter-spacing:-.2px;transition:opacity .15s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-outline{width:100%;padding:14px;border-radius:var(--radius-s);background:transparent;border:1.5px solid var(--blue);color:var(--blue);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
+.btn-red{background:var(--red)}
+.btn-green{background:var(--green)}
+.btn-s{padding:8px 14px;border-radius:var(--radius-xs);font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:var(--sans)}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+.btn-icon{background:none;border:none;color:var(--blue);font-size:15px;cursor:pointer;font-family:var(--sans);padding:4px 8px}
+
+/* 읽기 화면 */
+.toolbar{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tbtn{display:flex;align-items:center;gap:5px;padding:8px 12px;border-radius:20px;background:var(--card);border:1.5px solid var(--brd2);color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.tbtn.on{border-color:var(--blue);color:var(--blue);background:rgba(0,122,255,.08);font-weight:600}
+.tbtn.on-red{border-color:var(--red);color:var(--red);background:rgba(255,59,48,.08)}
+.tbr{margin-left:auto;display:flex;gap:6px}
+.tbr-btn{padding:7px 11px;border-radius:var(--radius-xs);background:var(--card);border:1.5px solid var(--brd2);color:var(--t2);font-size:13px;cursor:pointer;font-family:var(--sans)}
+
+/* 지문 블록 */
+.para-block{margin-bottom:20px}
+.para-num{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;font-family:var(--sans)}
+.pwrap{position:relative;background:var(--card);border-radius:var(--radius-s);padding:20px;border:1px solid var(--brd);user-select:none}
+.ptext{font-family:var(--serif);font-size:17px;color:var(--t);line-height:2.4;word-break:keep-all;position:relative;z-index:1;margin:0}
+.pcvs{position:absolute;inset:0;border-radius:var(--radius-s);touch-action:none;cursor:crosshair;z-index:2;width:100%;height:100%}
+
+/* 핵심 주장 칸 */
+.kw-block{margin-top:6px}
+.kw-label{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.kw-label span{color:var(--t4)}
+.kwwrap{position:relative;background:var(--card);border:1.5px solid var(--brd2);border-radius:var(--radius-s);overflow:hidden;transition:border-color .2s}
+.kwwrap.focused{border-color:var(--blue)}
+.kwcvs{display:block;width:100%;height:88px;touch-action:none;cursor:crosshair}
+.kwph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:13px;color:var(--t4);font-family:var(--serif)}
+
+/* 타이머 */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.timer-num{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;transition:color .4s;letter-spacing:-.5px}
+.timer-bar{height:3px;background:var(--brd);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.timer-fill{height:100%;border-radius:2px;transition:width 1s linear,background .4s}
+
+/* 로딩 */
+#sc-load{display:none}
+#sc-load.on{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:120px;gap:16px}
+.spinner{width:36px;height:36px;border:3px solid var(--brd);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-size:14px;color:var(--t3);font-family:var(--sans)}
+
+/* 결과 */
+.score-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+.score-big{font-size:64px;font-weight:700;line-height:1;letter-spacing:-2px}
+.grade-badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff}
+.result-para{margin-bottom:20px}
+.rpwrap{position:relative;background:var(--card);border-radius:var(--radius-s);padding:20px;border:1px solid var(--brd);user-select:none;margin-bottom:8px}
+.rptext{font-family:var(--serif);font-size:17px;color:var(--t);line-height:2.4;word-break:keep-all;position:relative;z-index:1;margin:0}
+.rcvs{position:absolute;inset:0;border-radius:var(--radius-s);pointer-events:none;width:100%;height:100%}
+.kw-compare{display:flex;gap:8px;align-items:stretch}
+.kw-mine{flex:1;background:var(--card);border:1.5px solid var(--brd2);border-radius:var(--radius-s);padding:10px 12px}
+.kw-ans{flex:1;border-radius:var(--radius-s);padding:10px 12px}
+.kw-ans.hit{background:rgba(52,199,89,.08);border:1.5px solid rgba(52,199,89,.3)}
+.kw-ans.miss{background:rgba(255,59,48,.06);border:1.5px solid rgba(255,59,48,.25)}
+.kw-sublabel{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.5px;margin-bottom:5px;text-transform:uppercase}
+.kw-ans-text{font-family:var(--serif);font-size:15px;font-weight:600}
+.kw-ans-text.hit{color:var(--green)}
+.kw-ans-text.miss{color:var(--red)}
+.check-icon{display:flex;align-items:center;justify-content:center;padding:0 6px;font-size:20px;flex-shrink:0}
+.feedback-box{background:var(--card2);border-radius:var(--radius-s);padding:14px 15px;border:1px solid var(--brd);margin-bottom:10px;font-size:14px;color:var(--t2);line-height:1.8;display:flex;gap:10px}
+.tip-box{background:rgba(52,199,89,.06);border:1.5px solid rgba(52,199,89,.2);border-radius:var(--radius-s);padding:13px 15px;font-size:14px;color:var(--t2);display:flex;gap:10px;margin-bottom:10px;line-height:1.8}
+.guide-box{background:rgba(0,122,255,.05);border:1.5px solid rgba(0,122,255,.15);border-radius:var(--radius-s);padding:13px 15px;font-size:14px;color:var(--t2);display:flex;gap:10px;margin-bottom:20px;line-height:1.8}
+
+/* 지문함 */
+.folder-item{background:var(--card);border-radius:var(--radius-s);padding:14px 16px;margin-bottom:8px;border:1px solid var(--brd);display:flex;align-items:center;gap:12px}
+.folder-item-info{flex:1;min-width:0}
+.folder-item-topic{font-size:11px;font-weight:600;color:var(--blue);margin-bottom:3px;letter-spacing:.3px}
+.folder-item-preview{font-size:14px;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--serif)}
+.folder-item-meta{font-size:11px;color:var(--t4);margin-top:3px}
+.folder-item-btns{display:flex;gap:6px;flex-shrink:0}
+
+/* 미리보기 */
+.preview-para{margin-bottom:18px}
+.preview-num{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:.8px;margin-bottom:6px}
+.preview-text{font-family:var(--serif);font-size:16px;color:var(--t);line-height:2.3;background:var(--card);border-radius:var(--radius-s);padding:16px;border:1px solid var(--brd)}
+
+/* 입력 */
+.input-label{font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px}
+textarea,input[type=text]{width:100%;background:var(--card);border:1.5px solid var(--brd2);border-radius:var(--radius-s);color:var(--t);font-family:var(--sans);font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;display:block}
+textarea:focus,input[type=text]:focus{border-color:var(--blue)}
+textarea{resize:none;font-family:var(--serif);line-height:1.8}
+.err{color:var(--red);font-size:13px;margin-top:6px}
+
+/* 빈 상태 */
+.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;line-height:2}
+
+/* 애니 */
+.sc.on{animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* 스크롤바 */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 헤더 -->
+<div class="hd">
+  <div>
+    <div class="hd-logo">READ<span>CORE</span></div>
+    <div class="hd-sub">국어 문해력 훈련</div>
+  </div>
+  <div id="hd-right"></div>
+</div>
+
+<main>
+
+<!-- ── 홈 ── -->
+<div id="sc-home" class="sc on">
+  <div class="seg">
+    <button class="seg-btn on" id="tab-builtin" onclick="switchTab('builtin')">📚 내장</button>
+    <button class="seg-btn" id="tab-folder" onclick="switchTab('folder')">📂 지문함</button>
+    <button class="seg-btn" id="tab-paste" onclick="switchTab('paste')">➕ 추가</button>
+  </div>
+
+  <!-- 내장 -->
+  <div id="panel-builtin">
+    <div class="card">
+      <div class="card-label">영역 선택</div>
+      <div class="section-label">독서 · 비문학</div>
+      <div class="chips">
+        <button class="chip on" data-val="과학·기술" onclick="selTopic(this)">과학·기술</button>
+        <button class="chip" data-val="인문·예술" onclick="selTopic(this)">인문·예술</button>
+        <button class="chip" data-val="사회·문화" onclick="selTopic(this)">사회·문화</button>
+        <button class="chip" data-val="법·경제" onclick="selTopic(this)">법·경제</button>
+        <button class="chip" data-val="독서론" onclick="selTopic(this)">독서론</button>
+        <button class="chip" data-val="융합" onclick="selTopic(this)">융합</button>
+      </div>
+      <div class="section-label">현대문학</div>
+      <div class="chips">
+        <button class="chip" data-val="현대시" onclick="selTopic(this)">현대시</button>
+        <button class="chip" data-val="현대소설" onclick="selTopic(this)">현대소설</button>
+        <button class="chip" data-val="현대수필" onclick="selTopic(this)">현대수필</button>
+        <button class="chip" data-val="현대희곡" onclick="selTopic(this)">현대희곡</button>
+      </div>
+      <div class="section-label">고전문학</div>
+      <div class="chips">
+        <button class="chip" data-val="고전시가" onclick="selTopic(this)">고전시가</button>
+        <button class="chip" data-val="고전소설" onclick="selTopic(this)">고전소설</button>
+        <button class="chip" data-val="고전수필" onclick="selTopic(this)">고전수필</button>
+        <button class="chip" data-val="향가·속요" onclick="selTopic(this)">향가·속요</button>
+      </div>
+      <div class="section-label">선택과목</div>
+      <div class="chips">
+        <button class="chip" data-val="화법" onclick="selTopic(this)">화법</button>
+        <button class="chip" data-val="작문" onclick="selTopic(this)">작문</button>
+        <button class="chip" data-val="화법+작문" onclick="selTopic(this)">화법+작문</button>
+        <button class="chip" data-val="언어·문법" onclick="selTopic(this)">언어·문법</button>
+        <button class="chip" data-val="매체" onclick="selTopic(this)">매체</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">기호 체계</div>
+      <div class="sym-guide">
+        <div class="sym-row"><span class="sym-ico">○</span><span class="sym-name" style="color:#007aff">동그라미</span><div><div class="sym-desc">핵심 키워드 / 문학: 인물·화자</div><div class="sym-ex">개념어, 인물명, 핵심 소재</div></div></div>
+        <div class="sym-row"><span class="sym-ico">＿</span><span class="sym-name" style="color:#ff3b30">밑줄</span><div><div class="sym-desc">핵심 주장·결론 문장</div><div class="sym-ex">전환어 다음 문장, 결론부</div></div></div>
+        <div class="sym-row"><span class="sym-ico">△</span><span class="sym-name" style="color:#ff9500">세모</span><div><div class="sym-desc">역접·전환어</div><div class="sym-ex">그러나, 반면, 하지만</div></div></div>
+        <div class="sym-row"><span class="sym-ico">(　)</span><span class="sym-name" style="color:#8e8e93">괄호</span><div><div class="sym-desc">부연·연결어 → 읽기 스킵</div><div class="sym-ex">따라서, 그리고, 즉, 예를 들어</div></div></div>
+      </div>
+      <div class="infobox">① 단락 읽으며 <strong>기호 손글씨</strong>로 표시<br>② 단락 아래 칸에 <strong>핵심 주장</strong> 손글씨<br>③ 제출 → 정답 오버레이 + OCR 채점</div>
+      <button class="btn" onclick="startBuiltin()">훈련 시작 →</button>
+    </div>
+  </div>
+
+  <!-- 지문함 -->
+  <div id="panel-folder" style="display:none">
+    <div class="card">
+      <div class="card-label">영역 필터</div>
+      <div class="chips" id="folder-filter-chips">
+        <button class="chip on" data-fval="전체" onclick="filterFolder(this)">전체</button>
+        <button class="chip" data-fval="과학·기술" onclick="filterFolder(this)">과학·기술</button>
+        <button class="chip" data-fval="인문·예술" onclick="filterFolder(this)">인문·예술</button>
+        <button class="chip" data-fval="사회·문화" onclick="filterFolder(this)">사회·문화</button>
+        <button class="chip" data-fval="법·경제" onclick="filterFolder(this)">법·경제</button>
+        <button class="chip" data-fval="독서론" onclick="filterFolder(this)">독서론</button>
+        <button class="chip" data-fval="융합" onclick="filterFolder(this)">융합</button>
+        <button class="chip" data-fval="현대시" onclick="filterFolder(this)">현대시</button>
+        <button class="chip" data-fval="현대소설" onclick="filterFolder(this)">현대소설</button>
+        <button class="chip" data-fval="현대수필" onclick="filterFolder(this)">현대수필</button>
+        <button class="chip" data-fval="현대희곡" onclick="filterFolder(this)">현대희곡</button>
+        <button class="chip" data-fval="고전시가" onclick="filterFolder(this)">고전시가</button>
+        <button class="chip" data-fval="고전소설" onclick="filterFolder(this)">고전소설</button>
+        <button class="chip" data-fval="고전수필" onclick="filterFolder(this)">고전수필</button>
+        <button class="chip" data-fval="향가·속요" onclick="filterFolder(this)">향가·속요</button>
+        <button class="chip" data-fval="화법" onclick="filterFolder(this)">화법</button>
+        <button class="chip" data-fval="작문" onclick="filterFolder(this)">작문</button>
+        <button class="chip" data-fval="화법+작문" onclick="filterFolder(this)">화법+작문</button>
+        <button class="chip" data-fval="언어·문법" onclick="filterFolder(this)">언어·문법</button>
+        <button class="chip" data-fval="매체" onclick="filterFolder(this)">매체</button>
+      </div>
+    </div>
+    <div id="folder-list"></div>
+    <div class="card" style="margin-top:4px">
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">지문 추가 후 저장 → 구글 드라이브에 같은 이름으로 덮어쓰기</div>
+      <button class="btn" onclick="saveFile()">💾 파일 저장 (다운로드)</button>
+    </div>
+  </div>
+
+  <!-- 지문 추가 -->
+  <div id="panel-paste" style="display:none">
+    <div class="card">
+      <div class="card-label">영역</div>
+      <div class="chips" id="paste-topic-chips">
+        <button class="chip" data-val="독서론" onclick="selPasteTopic(this)">독서론</button>
+        <button class="chip on" data-val="과학·기술" onclick="selPasteTopic(this)">과학·기술</button>
+        <button class="chip" data-val="인문·예술" onclick="selPasteTopic(this)">인문·예술</button>
+        <button class="chip" data-val="사회·문화" onclick="selPasteTopic(this)">사회·문화</button>
+        <button class="chip" data-val="법·경제" onclick="selPasteTopic(this)">법·경제</button>
+        <button class="chip" data-val="융합" onclick="selPasteTopic(this)">융합</button>
+        <button class="chip" data-val="현대시" onclick="selPasteTopic(this)">현대시</button>
+        <button class="chip" data-val="현대소설" onclick="selPasteTopic(this)">현대소설</button>
+        <button class="chip" data-val="현대수필" onclick="selPasteTopic(this)">현대수필</button>
+        <button class="chip" data-val="현대희곡" onclick="selPasteTopic(this)">현대희곡</button>
+        <button class="chip" data-val="고전시가" onclick="selPasteTopic(this)">고전시가</button>
+        <button class="chip" data-val="고전소설" onclick="selPasteTopic(this)">고전소설</button>
+        <button class="chip" data-val="고전수필" onclick="selPasteTopic(this)">고전수필</button>
+        <button class="chip" data-val="향가·속요" onclick="selPasteTopic(this)">향가·속요</button>
+        <button class="chip" data-val="복합" onclick="selPasteTopic(this)">복합</button>
+        <button class="chip" data-val="화법" onclick="selPasteTopic(this)">화법</button>
+        <button class="chip" data-val="작문" onclick="selPasteTopic(this)">작문</button>
+        <button class="chip" data-val="화법+작문" onclick="selPasteTopic(this)">화법+작문</button>
+        <button class="chip" data-val="언어·문법" onclick="selPasteTopic(this)">언어·문법</button>
+        <button class="chip" data-val="매체" onclick="selPasteTopic(this)">매체</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="input-label">출처 (예: 2024 수능, 2025 6월 모평)</div>
+      <input type="text" id="paste-source" placeholder="출처를 입력하세요" style="margin-bottom:14px"/>
+      <div class="input-label">지문 붙여넣기</div>
+      <textarea id="paste-input" rows="10" placeholder="여기에 지문을 붙여넣으세요...&#10;들여쓰기나 빈 줄로 단락이 자동 구분됩니다" style="margin-bottom:8px"></textarea>
+      <p id="paste-err" class="err" style="display:none"></p>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn-outline" onclick="previewPassage()">미리보기</button>
+        <button class="btn" onclick="analyzePassage()">AI 분석 → 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 미리보기 ── -->
+<div id="sc-preview" class="sc">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="card-label" style="margin:0">지문 미리보기</div>
+      <button class="hd-btn" onclick="show('sc-home');switchTab('paste')">← 돌아가기</button>
+    </div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:14px">단락 구분이 맞는지 확인 후 AI 분석을 시작하세요</div>
+    <div id="preview-content"></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn-outline" onclick="show('sc-home');switchTab('paste')">다시 수정</button>
+      <button class="btn" onclick="analyzePassage()">AI 분석 → 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 로딩 ── -->
+<div id="sc-load" class="sc">
+  <div class="spinner"></div>
+  <div class="load-txt" id="load-txt">분석 중...</div>
+</div>
+
+<!-- ── 읽기 ── -->
+<div id="sc-read" class="sc">
+  <div class="card" style="padding:14px 16px">
+    <div class="timer-row">
+      <div style="font-size:13px;color:var(--t3)" id="read-label">훈련</div>
+      <div class="timer-num" id="timer-num">90s</div>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%;background:var(--green)"></div></div>
+    <div class="toolbar">
+      <button class="tbtn on" id="btn-pen" onclick="setPen('pen')">✏️ 펜</button>
+      <button class="tbtn" id="btn-ers" onclick="setPen('eraser')">⬜ 지우개</button>
+      <div class="tbr">
+        <button class="tbr-btn" onclick="doUndo()">↩</button>
+        <button class="tbr-btn" onclick="doClear()">전체삭제</button>
+      </div>
+    </div>
+    <!-- 기호 미니 가이드 -->
+    <div style="display:flex;flex-wrap:wrap;gap:10px;padding:10px 12px;background:var(--card2);border-radius:var(--radius-xs);margin-bottom:4px">
+      <span style="font-size:12px;color:var(--blue)">○ 키워드/인물</span>
+      <span style="font-size:12px;color:var(--red)">밑줄 핵심주장</span>
+      <span style="font-size:12px;color:var(--orange)">△ 역접전환</span>
+      <span style="font-size:12px;color:var(--t3)">( ) 부연스킵</span>
+    </div>
+  </div>
+  <!-- 단락들 (동적 생성) -->
+  <div id="paragraphs-wrap"></div>
+  <div class="card">
+    <p id="read-err" class="err" style="display:none;margin-bottom:10px"></p>
+    <button class="btn" id="sub-btn" onclick="submitWork()">제출 → AI 채점</button>
+  </div>
+</div>
+
+<!-- ── 결과 ── -->
+<div id="sc-result" class="sc">
+  <div class="card">
+    <div class="score-row">
+      <div class="score-big" id="r-score"></div>
+      <div class="grade-badge" id="r-grade"></div>
+    </div>
+  </div>
+  <div id="result-paragraphs"></div>
+  <div class="card">
+    <div class="feedback-box" id="r-feedback"></div>
+    <div class="tip-box" id="r-tip"></div>
+    <div class="guide-box" id="r-guide"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="nextOrHome()">다음 지문</button>
+      <button class="btn-outline" onclick="goHome()">처음으로</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+// 저장 지문 (파일 안에 직접 유지)
+// ═══════════════════════════════════════════════════════
+const USER_PASSAGES = [];
+
+// ═══════════════════════════════════════════════════════
+// 내장 지문 데이터
+// ═══════════════════════════════════════════════════════
+const PASSAGES = {
+"과학·기술":[
+{paragraphs:[{text:"빅데이터란 기존의 방식으로는 처리하기 어려운 방대한 양의 정형·비정형 데이터를 의미한다. 이러한 데이터를 분석하고 의미 있는 패턴을 추출하는 데 핵심적인 역할을 하는 것이 바로 알고리즘이다. 알고리즘은 특정 문제를 해결하기 위한 절차와 규칙의 집합으로, 빅데이터 환경에서는 머신러닝 기반의 알고리즘이 광범위하게 활용된다. 이처럼 빅데이터와 알고리즘은 상호 보완적으로 작용하여, 대량의 데이터에서 유의미한 정보를 도출하고 이를 의사 결정에 활용하는 데이터 기반 사회를 실현하는 핵심 기술로 자리잡고 있다.",
+keyword:"빅데이터의 의미와 알고리즘의 역할",
+circleWords:["빅데이터","알고리즘","머신러닝"],
+underlineWords:[
+  "기존의 방식으로는 처리하기 어려운 방대한 양의 정형·비정형 데이터를 의미한다",
+  "알고리즘은 특정 문제를 해결하기 위한 절차와 규칙의 집합으로",
+  "데이터 기반 사회를 실현하는 핵심 기술로 자리잡고 있다"
+],
+triangleWords:["이처럼"],parenWords:[],parenRanges:[{start:"이처럼",end:"자리잡고"}]}],
+annotationGuide:"'빅데이터', '알고리즘'에 동그라미. 정의·결론 문장에 밑줄. '이처럼'에 세모."},
+
+{paragraphs:[{text:"양자역학은 원자 이하의 미시 세계를 기술하는 물리학 이론으로, 입자가 관측되기 전까지 여러 상태에 동시에 존재하는 '중첩' 현상을 핵심 개념으로 삼는다. 고전 물리학에서는 입자의 위치와 운동량을 동시에 정확히 알 수 있다고 보지만, 하이젠베르크의 불확정성 원리에 따르면 이 두 값을 동시에 정확히 측정하는 것은 원천적으로 불가능하다. 이는 측정 행위 자체가 입자의 상태에 영향을 미치기 때문으로, 양자 세계의 본질적 특성을 드러낸다.",
+keyword:"양자역학의 핵심 개념과 고전물리학과의 대립",
+circleWords:["중첩","불확정성 원리","고전 물리학"],
+underlineWords:[
+  "입자가 관측되기 전까지 여러 상태에 동시에 존재하는",
+  "이 두 값을 동시에 정확히 측정하는 것은 원천적으로 불가능하다",
+  "측정 행위 자체가 입자의 상태에 영향을 미치기 때문으로"
+],
+triangleWords:["하지만"],parenWords:[]}],
+annotationGuide:"'중첩', '불확정성 원리'에 동그라미. 중첩 정의·측정 불가 이유·결론에 밑줄."},
+],
+
+"인문·예술":[
+{paragraphs:[{text:"자유의지란 외부의 강제나 인과적 필연성에 구속받지 않고 스스로 선택하고 행위할 수 있는 능력을 말한다. 결정론은 이에 정면으로 대립하는 입장으로, 우주의 모든 사건은 선행 원인에 의해 필연적으로 결정된다고 본다. 자유의지와 결정론이 양립 불가능하다는 강경한 비양립론과 달리, 양립론자들은 결정론이 참이더라도 자유의지가 의미 있게 존재할 수 있다고 주장한다. 이 논쟁은 도덕적 책임의 근거와 직결되기에, 철학적으로 매우 중요한 의미를 지닌다.",
+keyword:"자유의지와 결정론의 대립 및 양립론의 주장",
+circleWords:["자유의지","결정론","양립론","비양립론"],
+underlineWords:[
+  "외부의 강제나 인과적 필연성에 구속받지 않고 스스로 선택하고 행위할 수 있는 능력을 말한다",
+  "우주의 모든 사건은 선행 원인에 의해 필연적으로 결정된다고 본다",
+  "결정론이 참이더라도 자유의지가 의미 있게 존재할 수 있다고 주장한다"
+],
+triangleWords:["달리"],parenWords:[]}],
+annotationGuide:"핵심 개념어에 동그라미. 자유의지·결정론 정의, 양립론 주장에 밑줄. '달리'에 세모."},
+
+{paragraphs:[{text:"숭고(崇高)는 아름다움과 구별되는 미적 경험으로, 거대하고 압도적인 대상 앞에서 느끼는 경외감과 쾌감의 복합적 감정을 뜻한다. 칸트는 숭고를 수학적 숭고와 역학적 숭고로 나누어, 수학적 숭고는 자연의 무한한 크기 앞에서, 역학적 숭고는 자연의 압도적 힘 앞에서 느끼는 감정이라고 설명하였다. 숭고 경험은 단순한 감각적 쾌락과 달리, 인간 이성의 우월성을 자각하게 한다는 점에서 도덕적 차원으로까지 연결된다.",
+keyword:"숭고의 개념과 칸트의 두 가지 구분",
+circleWords:["숭고","수학적 숭고","역학적 숭고"],
+underlineWords:[
+  "거대하고 압도적인 대상 앞에서 느끼는 경외감과 쾌감의 복합적 감정을 뜻한다",
+  "수학적 숭고는 자연의 무한한 크기 앞에서, 역학적 숭고는 자연의 압도적 힘 앞에서 느끼는 감정",
+  "인간 이성의 우월성을 자각하게 한다는 점에서 도덕적 차원으로까지 연결된다"
+],
+triangleWords:["달리"],parenWords:[]}],
+annotationGuide:"숭고 개념어에 동그라미. 숭고 정의·두 구분·결론에 밑줄. '달리'에 세모."},
+],
+
+"사회·문화":[
+{paragraphs:[{text:"미디어는 단순한 정보 전달 매체를 넘어, 현대 사회에서 여론 형성과 공론장 구성에 핵심적인 역할을 한다. 특히 소셜 미디어의 등장으로 정보의 생산과 소비가 동시에 이루어지는 참여형 구조가 자리잡았다. 그러나 알고리즘 기반의 정보 필터링은 이용자가 자신의 신념과 일치하는 정보만을 접하게 하는 '필터 버블' 현상을 초래하여, 사회적 다양성과 민주적 토론을 위협하고 있다. 미디어 리터러시 교육의 중요성이 강조되는 이유가 여기에 있다.",
+keyword:"필터 버블 문제와 미디어 리터러시의 필요성",
+circleWords:["필터 버블","미디어 리터러시","소셜 미디어"],
+underlineWords:[
+  "이용자가 자신의 신념과 일치하는 정보만을 접하게 하는 '필터 버블' 현상을 초래하여",
+  "사회적 다양성과 민주적 토론을 위협하고 있다"
+],
+triangleWords:["그러나"],parenWords:[],parenRanges:[{start:"특히",end:"자리잡았다"}]}],
+annotationGuide:"'필터 버블'에 동그라미. 필터 버블 정의·위협 문장에 밑줄. '그러나'에 세모."},
+],
+
+"법·경제":[
+{paragraphs:[{text:"외부 효과란 한 경제 주체의 행위가 시장 거래를 거치지 않고 제3자에게 이익이나 손해를 끼치는 현상을 말한다. 공장의 오염 물질 배출처럼 사회적 비용을 발생시키는 부정적 외부 효과는 시장에서 과잉 생산이 일어나는 시장 실패의 원인이 된다. 이를 해결하기 위해 정부는 탄소세 부과, 배출권 거래제 도입 등의 방식으로 외부 비용을 내부화하는 정책을 시행한다. 이처럼 외부 효과의 교정은 자원의 효율적 배분을 위한 핵심 과제이다.",
+keyword:"외부 효과의 의미와 시장 실패 및 정부 해결책",
+circleWords:["외부 효과","시장 실패","탄소세"],
+underlineWords:[
+  "한 경제 주체의 행위가 시장 거래를 거치지 않고 제3자에게 이익이나 손해를 끼치는 현상을 말한다",
+  "부정적 외부 효과는 시장에서 과잉 생산이 일어나는 시장 실패의 원인이 된다",
+  "외부 효과의 교정은 자원의 효율적 배분을 위한 핵심 과제이다"
+],
+triangleWords:["이처럼"],parenWords:[],parenRanges:[{start:"이처럼",end:"핵심"}]}],
+annotationGuide:"핵심 개념에 동그라미. 정의·시장실패 원인·결론에 밑줄. '이처럼'에 세모."},
+
+{paragraphs:[{text:"죄형법정주의란 어떤 행위가 범죄가 되고 그에 대한 형벌이 무엇인지를 미리 법률로 규정해 두어야 한다는 원칙이다. 이 원칙은 국가 권력의 자의적 행사로부터 개인의 자유를 보호하는 데 그 목적이 있다. 법률불소급의 원칙, 유추 해석 금지의 원칙 등이 죄형법정주의의 파생 원칙으로 인정된다. 특히 유추 해석 금지는 법률에 명시되지 않은 사항을 유사한 규정으로 처벌하는 것을 엄격히 금지함으로써, 법적 안정성과 예측 가능성을 보장한다.",
+keyword:"죄형법정주의의 목적과 파생 원칙",
+circleWords:["죄형법정주의","법률불소급","유추 해석"],
+underlineWords:[
+  "어떤 행위가 범죄가 되고 그에 대한 형벌이 무엇인지를 미리 법률로 규정해 두어야 한다는 원칙이다",
+  "국가 권력의 자의적 행사로부터 개인의 자유를 보호하는 데 그 목적이 있다",
+  "법률에 명시되지 않은 사항을 유사한 규정으로 처벌하는 것을 엄격히 금지"
+],
+triangleWords:[],parenWords:[],parenRanges:[{start:"특히",end:"금지"}]}],
+annotationGuide:"원칙명에 동그라미. 정의·목적·유추해석금지 내용에 밑줄."},
+],
+
+"현대시":[
+{paragraphs:[{text:"나 보기가 역겨워 / 가실 때에는 / 말없이 고이 보내 드리오리다 // 영변에 약산 / 진달래꽃 / 아름 따다 가실 길에 뿌리오리다 // 가시는 걸음걸음 / 놓인 그 꽃을 / 사뿐히 즈려밟고 가시옵소서 // 나 보기가 역겨워 / 가실 때에는 / 죽어도 아니 눈물 흘리오리다",
+keyword:"이별의 슬픔과 화자의 감정 절제",
+circleWords:["나","진달래꽃"],
+underlineWords:[
+  "말없이 고이 보내 드리오리다",
+  "죽어도 아니 눈물 흘리오리다"
+],
+triangleWords:[],parenWords:[]}],
+annotationGuide:"화자 '나'와 소재 '진달래꽃'에 동그라미. 체념·역설 구절에 밑줄 (선지에서 '적극 저항', '슬픔 표출'로 뒤틀림)."},
+],
+
+"현대소설":[
+{paragraphs:[{text:"이상의 소설 「날개」는 무기력한 지식인의 자아 분열과 소외를 그린 작품이다. 주인공 '나'는 아내의 방과 자신의 방이 구분된 공간에 갇혀, 아내에게 경제적·정신적으로 의존하며 살아간다. 어느 날 아내의 비밀을 알게 된 '나'는 미쓰코시 백화점 옥상에서 '날자꾸나'라고 외치며 새로운 자아를 향한 의지를 보인다. 이 소설은 1930년대 식민지 현실 속 지식인의 내면을 날카롭게 포착한 심리 소설의 걸작으로 평가받는다.",
+keyword:"지식인의 자아 분열과 소외 및 자유 의지",
+circleWords:["나"],
+underlineWords:[
+  "아내에게 경제적·정신적으로 의존하며 살아간다",
+  "새로운 자아를 향한 의지를 보인다",
+  "1930년대 식민지 현실 속 지식인의 내면을 날카롭게 포착한"
+],
+triangleWords:["어느 날"],parenWords:[]}],
+annotationGuide:"인물 '나'에 동그라미. 의존 상태·의지·주제에 밑줄 (선지에서 '독립적', '체념'으로 뒤틀림). '어느 날'에 세모."},
+],
+
+"고전시가":[
+{paragraphs:[{text:"청산리 벽계수야 수이 감을 자랑 마라 / 일도 창해하면 다시 오기 어려워라 / 명월이 만공산하니 쉬어 간들 어떠리 // 황진이의 시조로, 물(벽계수)을 통해 인생의 덧없음을 노래하며, 흐르는 물에 빨리 가지 말고 달빛 아래 잠시 쉬어 가기를 권유한다. 자연물인 물과 달을 매개로 인생의 무상함과 풍류를 담아낸 작품이다.",
+keyword:"자연물을 통한 인생 무상과 풍류의 권유",
+circleWords:["벽계수","명월"],
+underlineWords:[
+  "수이 감을 자랑 마라",
+  "일도 창해하면 다시 오기 어려워라",
+  "인생의 무상함과 풍류를 담아낸 작품이다"
+],
+triangleWords:[],parenWords:[]}],
+annotationGuide:"'벽계수'·'명월'에 동그라미. 경계 구절·인생무상 구절·주제에 밑줄 (선지에서 '자연 예찬'으로 뒤틀림)."},
+],
+
+"고전소설":[
+{paragraphs:[{text:"「춘향전」은 신분 초월의 사랑을 그린 판소리계 소설이다. 남원 부사의 아들 이몽룡과 기생 월매의 딸 춘향이 첫눈에 반해 백년가약을 맺는다. 그러나 이몽룡이 한양으로 떠난 후, 새로 부임한 변학도는 춘향에게 수청을 강요하고, 춘향은 이를 거부하다 옥에 갇힌다. 마침내 암행어사가 된 이몽룡이 변학도의 생일잔치에 나타나 춘향을 구하고, 두 사람은 재회한다. 이 작품은 봉건적 신분 질서에 저항하는 사랑과 정절의 가치를 담고 있다.",
+keyword:"신분을 초월한 사랑과 봉건 질서에 대한 저항",
+circleWords:["춘향","이몽룡","변학도"],
+underlineWords:[
+  "춘향은 이를 거부하다 옥에 갇힌다",
+  "봉건적 신분 질서에 저항하는 사랑과 정절의 가치를 담고 있다"
+],
+triangleWords:["그러나","마침내"],parenWords:[]}],
+annotationGuide:"인물에 동그라미. 춘향 저항 사건·주제에 밑줄 (선지에서 '수청을 받아들였다', '신분 순응'으로 뒤틀림). '그러나'·'마침내'에 세모."},
+],
+
+"향가·속요":[
+{paragraphs:[{text:"청산별곡(靑山別曲)은 고려 속요로, 삶의 고뇌와 현실 도피의 정서를 담고 있다. 화자는 '살어리 살어리랏다 청산에 살어리랏다'라고 반복하며 청산으로의 도피를 소망한다. 현실의 고통에서 벗어나 자연 속에서 살고자 하는 열망이 전편에 걸쳐 나타나며, 후렴구의 반복을 통해 이 정서가 강조된다.",
+keyword:"현실 고통에서 청산으로의 도피 열망",
+circleWords:["청산"],
+underlineWords:[
+  "삶의 고뇌와 현실 도피의 정서를 담고 있다",
+  "현실의 고통에서 벗어나 자연 속에서 살고자 하는 열망이 전편에 걸쳐 나타나며",
+  "후렴구의 반복을 통해 이 정서가 강조된다"
+],
+triangleWords:[],parenWords:[]}],
+annotationGuide:"'청산'에 동그라미. 작품 주제·열망·반복 강조에 밑줄 (선지에서 '자연 예찬', '극복 의지'로 뒤틀림)."},
+],
+};
+
+// ═══════════════════════════════════════════════════════
+// 상태
+// ═══════════════════════════════════════════════════════
+let topic='과학·기술', pasteTopic='과학·기술', folderFilter='전체';
+let passage=null, isPastedPassage=false;
+let usedIdx={};
+let penMode='pen', activePara=-1;
+let paraStrokes=[], paraKwArr=[];
+let timerVal=90, timerInt=null, submitting=false;
+
+// ═══════════════════════════════════════════════════════
+// 유틸
+// ═══════════════════════════════════════════════════════
+function show(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('hd-right').innerHTML='';
+}
+
+// ═══════════════════════════════════════════════════════
+// 탭 전환
+// ═══════════════════════════════════════════════════════
+function switchTab(tab){
+  ['builtin','folder','paste'].forEach(t=>{
+    document.getElementById('panel-'+t).style.display=t===tab?'':'none';
+    document.getElementById('tab-'+t).classList.toggle('on',t===tab);
+  });
+  if(tab==='folder')renderFolderList();
+}
+
+function selTopic(el){
+  document.querySelectorAll('#panel-builtin .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');topic=el.dataset.val;
+}
+function selPasteTopic(el){
+  document.querySelectorAll('#paste-topic-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');pasteTopic=el.dataset.val;
+}
+function filterFolder(el){
+  document.querySelectorAll('#folder-filter-chips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');folderFilter=el.dataset.fval;renderFolderList();
+}
+
+// ═══════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════
+async function callAPI(msgs, maxTok=1500){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok,
+      system:'수능 국어 전문가. 순수 JSON만 출력. 마크다운 절대 금지.',messages:msgs})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  const txt=(d.content||[]).map(b=>b.text||'').join('');
+  const m=txt.match(/\{[\s\S]*\}/);
+  if(!m)throw new Error('JSON 없음');
+  return JSON.parse(m[0]);
+}
+
+// ═══════════════════════════════════════════════════════
+// 들여쓰기·빈줄 기준 단락 분리
+// ═══════════════════════════════════════════════════════
+function splitByIndent(raw){
+  const lines=raw.split('\n');
+  const paras=[];let cur=[];
+  for(const line of lines){
+    const trimmed=line.trim();
+    if(!trimmed){if(cur.length){paras.push(cur.join(' ').trim());cur=[];}continue;}
+    if(cur.length&&/^[\s\u3000\u00a0\t]/.test(line)){paras.push(cur.join(' ').trim());cur=[];}
+    cur.push(trimmed);
+  }
+  if(cur.length)paras.push(cur.join(' ').trim());
+  return paras.filter(Boolean);
+}
+
+// ═══════════════════════════════════════════════════════
+// 미리보기
+// ═══════════════════════════════════════════════════════
+function previewPassage(){
+  const raw=document.getElementById('paste-input').value.trim();
+  if(!raw){showErr('paste-err','지문을 붙여넣어 주세요.');return;}
+  hideErr('paste-err');
+  const paras=splitByIndent(raw);
+  if(!paras.length){showErr('paste-err','단락을 인식하지 못했습니다.');return;}
+  document.getElementById('preview-content').innerHTML=paras.map((p,i)=>`
+    <div class="preview-para">
+      <div class="preview-num">단락 ${i+1}</div>
+      <div class="preview-text">${p}</div>
+    </div>`).join('');
+  show('sc-preview');
+}
+
+// ═══════════════════════════════════════════════════════
+// AI 분석 → 지문함 저장
+// ═══════════════════════════════════════════════════════
+async function analyzePassage(){
+  const raw=document.getElementById('paste-input').value.trim();
+  if(!raw){showErr('paste-err','지문을 붙여넣어 주세요.');show('sc-home');switchTab('paste');return;}
+  hideErr('paste-err');
+  show('sc-load');document.getElementById('load-txt').textContent='AI가 지문 분석 중...';
+  const paras=splitByIndent(raw);
+  if(!paras.length){showErr('paste-err','단락 인식 실패.');show('sc-home');switchTab('paste');return;}
+  const t=pasteTopic;
+  try{
+    const paraList=paras.map((p,i)=>`단락${i+1}: ${p}`).join('\n\n');
+    const jsonExample='{"paragraphs":[{"text":"원문","keyword":"핵심주장","circleWords":[],"underlineWords":[],"triangleWords":[],"parenWords":[],"parenRanges":[{"start":"연결어","end":"마지막단어"}]}],"annotationGuide":"전략"}';
+    const prompt=`수능 국어 지문 분석. 영역: ${t}\n\n기호 체계:\n- circleWords: 핵심 키워드 / 문학은 인물·화자·핵심 소재\n- underlineWords: 정의·설명 구절 + 핵심 주장 구절. 1~3개만.\n- triangleWords: 역접·전환어 (그러나/반면/하지만)\n- parenWords: 부연·연결어 (따라서/그리고/즉)\n- parenRanges: 괄호 범위 [{start:"연결어",end:"마지막단어"}]\n- keyword: 핵심 주장 (~의 ~와 ~ 형식)\n\n[단락들]\n${paraList}\n\nJSON만:\n${jsonExample}`;
+    const result=await callAPI([{role:'user',content:prompt}],2000);
+
+    topic=t;
+    const newP={
+      id:'p_'+Date.now(),topic:t,
+      source:document.getElementById('paste-source')?.value.trim()||'',
+      addedAt:new Date().toLocaleDateString('ko-KR'),
+      paragraphs:paras.map((txt,i)=>({
+        text:txt,
+        keyword:result.paragraphs?.[i]?.keyword||'',
+        circleWords:result.paragraphs?.[i]?.circleWords||[],
+        underlineWords:result.paragraphs?.[i]?.underlineWords||[],
+        triangleWords:result.paragraphs?.[i]?.triangleWords||[],
+        parenWords:result.paragraphs?.[i]?.parenWords||[]
+      })),
+      annotationGuide:result.annotationGuide||''
+    };
+    USER_PASSAGES.push(newP);
+    passage={paragraphs:newP.paragraphs,annotationGuide:newP.annotationGuide};
+    isPastedPassage=true;
+    document.getElementById('paste-input').value='';
+    if(document.getElementById('paste-source'))document.getElementById('paste-source').value='';
+    startReading();
+  }catch(e){
+    show('sc-home');switchTab('paste');
+    showErr('paste-err','분석 실패: '+e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 내장 지문 시작
+// ═══════════════════════════════════════════════════════
+function pickPassage(){
+  const list=PASSAGES[topic];if(!list?.length)return null;
+  if(!usedIdx[topic])usedIdx[topic]=[];
+  let avail=list.map((_,i)=>i).filter(i=>!usedIdx[topic].includes(i));
+  if(!avail.length){usedIdx[topic]=[];avail=list.map((_,i)=>i);}
+  const idx=avail[Math.floor(Math.random()*avail.length)];
+  usedIdx[topic].push(idx);return list[idx];
+}
+
+function startBuiltin(){
+  const p=pickPassage();
+  if(!p){alert('해당 영역 내장 지문이 없어요.\n지문함에서 직접 추가해주세요.');return;}
+  passage={paragraphs:p.paragraphs,annotationGuide:p.annotationGuide||''};
+  isPastedPassage=false;
+  startReading();
+}
+
+// ═══════════════════════════════════════════════════════
+// 지문함
+// ═══════════════════════════════════════════════════════
+function renderFolderList(){
+  const el=document.getElementById('folder-list');
+  const list=folderFilter==='전체'?USER_PASSAGES:USER_PASSAGES.filter(p=>p.topic===folderFilter);
+  if(!list.length){
+    el.innerHTML=`<div class="empty">${folderFilter==='전체'?'저장된 지문이 없어요<br>➕ 추가 탭에서 지문을 넣어주세요':'이 영역에 저장된 지문이 없어요'}</div>`;
+    return;
+  }
+  el.innerHTML=list.map((p,idx)=>`
+    <div class="folder-item">
+      <div class="folder-item-info">
+        <div class="folder-item-topic">${p.topic}${p.source?' · '+p.source:''}</div>
+        <div class="folder-item-preview">${p.paragraphs.map(q=>q.text).join(' ').slice(0,55)}...</div>
+        <div class="folder-item-meta">${p.addedAt||''}</div>
+      </div>
+      <div class="folder-item-btns">
+        <button class="btn-s" style="background:var(--blue);color:#fff" data-pid="${p.id}" onclick="startFolderPassage(this.dataset.pid)">시작</button>
+        <button class="btn-s" style="background:rgba(255,59,48,.1);color:var(--red);border:1px solid rgba(255,59,48,.2)" data-pid="${p.id}" onclick="deletePassage(this.dataset.pid)">삭제</button>
+      </div>
+    </div>`).join('');
+}
+
+function startFolderPassage(id){
+  const p=USER_PASSAGES.find(x=>x.id===id);if(!p)return;
+  topic=p.topic;
+  passage={paragraphs:p.paragraphs,annotationGuide:p.annotationGuide||''};
+  isPastedPassage=true;startReading();
+}
+
+function deletePassage(id){
+  const idx=USER_PASSAGES.findIndex(x=>x.id===id);if(idx<0)return;
+  const p=USER_PASSAGES[idx];
+  if(!confirm(`"${p.topic}${p.source?' · '+p.source:''}" 지문을 삭제할까요?`))return;
+  USER_PASSAGES.splice(idx,1);renderFolderList();
+}
+
+// ═══════════════════════════════════════════════════════
+// 파일 저장
+// ═══════════════════════════════════════════════════════
+function saveFile(){
+  let html=document.documentElement.outerHTML;
+  const marker='const USER_PASSAGES = [];';
+  const newData=`const USER_PASSAGES = ${JSON.stringify(USER_PASSAGES,null,2)};`;
+  html=html.replace(marker,newData);
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='readcore_v3.html';a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════════════════
+// 읽기 화면 구성
+// ═══════════════════════════════════════════════════════
+function startReading(){
+  paraStrokes=passage.paragraphs.map(()=>[]);
+  paraKwArr=passage.paragraphs.map(()=>[]);
+  activePara=-1;
+  document.getElementById('read-label').textContent='✏️ '+topic;
+  buildReadUI();
+  show('sc-read');
+  document.getElementById('hd-right').innerHTML='';
+  setTimeout(()=>{initAllCanvases();startTimer();},150);
+}
+
+function buildReadUI(){
+  const wrap=document.getElementById('paragraphs-wrap');
+  wrap.innerHTML='';
+  passage.paragraphs.forEach((para,i)=>{
+    const div=document.createElement('div');
+    div.className='para-block';
+    div.innerHTML=`
+      <div class="para-num">단락 ${i+1}</div>
+      <div class="pwrap" id="pwrap-${i}">
+        <p class="ptext" id="ptext-${i}"></p>
+        <canvas class="pcvs" id="pcvs-${i}"></canvas>
+      </div>
+      <div class="kw-block">
+        <div class="kw-label">핵심 주장 <span>→ 손글씨로</span></div>
+        <div class="kwwrap" id="kwwrap-${i}">
+          <canvas class="kwcvs" id="kwcvs-${i}"></canvas>
+          <div class="kwph" id="kwph-${i}">단락 ${i+1}의 핵심 주장을 써주세요</div>
+        </div>
+      </div>`;
+    wrap.appendChild(div);
+    document.getElementById(`ptext-${i}`).innerHTML=
+      para.text.split(/(\s+)/).map(w=>w.trim()
+        ?`<span data-word="${w.replace(/[.,!?;:'"()「」『』\/]/g,'')}" data-para="${i}">${w}</span>`
+        :w).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 캔버스
+// ═══════════════════════════════════════════════════════
+function initAllCanvases(){
+  passage.paragraphs.forEach((_,i)=>{syncSize(i);initPen(i);initKw(i);});
+}
+
+function syncSize(i){
+  const c=document.getElementById(`pcvs-${i}`),w=document.getElementById(`pwrap-${i}`);
+  if(c&&w){const r=w.getBoundingClientRect();c.width=Math.round(r.width);c.height=Math.round(r.height);}
+  const kc=document.getElementById(`kwcvs-${i}`);
+  if(kc){const p=kc.parentElement?.getBoundingClientRect();if(p){kc.width=Math.round(p.width)-4;kc.height=88;}}
+  redrawP(i);redrawKw(i);
+}
+
+function drawStroke(ctx,s,color,alpha){
+  if(!s.pts||s.pts.length<2)return;
+  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();s.pts.forEach((p,j)=>j===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
+}
+
+function redrawP(i,live){
+  const c=document.getElementById(`pcvs-${i}`);if(!c)return;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  [...(paraStrokes[i]||[]),...(live?[live]:[])].forEach(s=>{
+    if(s.eraser){ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineWidth=28;ctx.lineCap='round';ctx.beginPath();s.pts.forEach((p,j)=>j===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();}
+    else drawStroke(ctx,s,'rgba(30,30,30,0.85)',1);
+  });
+}
+
+function redrawKw(i,live){
+  const c=document.getElementById(`kwcvs-${i}`);if(!c)return;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  ctx.save();ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1;
+  for(let y=36;y<c.height;y+=36){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke();}ctx.restore();
+  [...(paraKwArr[i]||[]),...(live?.length?[live]:[])].forEach(pts=>{
+    ctx.save();ctx.strokeStyle='rgba(30,30,30,0.85)';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();pts.forEach((p,j)=>j===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
+  });
+  const ph=document.getElementById(`kwph-${i}`);if(ph)ph.style.display=(paraKwArr[i]||[]).length?'none':'';
+}
+
+function gpos(e,cvs){const r=cvs.getBoundingClientRect(),src=e.touches?.[0]??e;return{x:src.clientX-r.left,y:src.clientY-r.top};}
+
+function getWordRects(i){
+  const w=document.getElementById(`pwrap-${i}`);if(!w)return[];
+  const pr=w.getBoundingClientRect();
+  return Array.from(w.querySelectorAll(`span[data-para="${i}"]`)).map(s=>{
+    const r=s.getBoundingClientRect();
+    return{word:s.dataset.word,l:r.left-pr.left,t:r.top-pr.top,r:r.right-pr.left,b:r.bottom-pr.top};
+  });
+}
+function bbox(pts){const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);return{l:Math.min(...xs)-8,r:Math.max(...xs)+8,t:Math.min(...ys)-8,b:Math.max(...ys)+8};}
+function overlaps(a,b){return!(a.r<b.l||a.l>b.r||a.b<b.t||a.t>b.b);}
+function hitWords(pts,i){const bb=bbox(pts);return[...new Set(getWordRects(i).filter(w=>overlaps(bb,w)).map(w=>w.word))];}
+
+function initPen(i){
+  const c=document.getElementById(`pcvs-${i}`);
+  let drawing=false,live=[];
+  const dn=e=>{e.preventDefault();activePara=i;drawing=true;live=[gpos(e,c)];};
+  const mv=e=>{e.preventDefault();if(!drawing)return;live.push(gpos(e,c));
+    redrawP(i,penMode==='eraser'?{pts:live,eraser:true}:{pts:live});};
+  const up=()=>{if(!drawing)return;drawing=false;const pts=[...live];live=[];if(pts.length<2)return;
+    if(penMode==='eraser')paraStrokes[i].push({eraser:true,pts});
+    else paraStrokes[i].push({pts,words:hitWords(pts,i)});
+    redrawP(i);};
+  ['mousedown','touchstart'].forEach(ev=>c.addEventListener(ev,dn,{passive:false}));
+  ['mousemove','touchmove'].forEach(ev=>c.addEventListener(ev,mv,{passive:false}));
+  ['mouseup','mouseleave','touchend'].forEach(ev=>c.addEventListener(ev,up));
+}
+
+function initKw(i){
+  const c=document.getElementById(`kwcvs-${i}`),w=document.getElementById(`kwwrap-${i}`);
+  let drawing=false,live=[];
+  const dn=e=>{e.preventDefault();activePara=i;drawing=true;live=[gpos(e,c)];w.classList.add('focused');};
+  const mv=e=>{e.preventDefault();if(!drawing)return;live.push(gpos(e,c));redrawKw(i,live);};
+  const up=()=>{if(!drawing)return;drawing=false;if(live.length>1)paraKwArr[i].push([...live]);live=[];w.classList.remove('focused');redrawKw(i);};
+  ['mousedown','touchstart'].forEach(ev=>c.addEventListener(ev,dn,{passive:false}));
+  ['mousemove','touchmove'].forEach(ev=>c.addEventListener(ev,mv,{passive:false}));
+  ['mouseup','mouseleave','touchend'].forEach(ev=>c.addEventListener(ev,up));
+}
+
+function setPen(m){
+  penMode=m;
+  document.getElementById('btn-pen').className='tbtn'+(m==='pen'?' on':'');
+  document.getElementById('btn-ers').className='tbtn'+(m==='eraser'?' on-red':'');
+}
+function doUndo(){
+  if(activePara<0)return;
+  if(paraStrokes[activePara]?.length){paraStrokes[activePara].pop();redrawP(activePara);}
+  else if(paraKwArr[activePara]?.length){paraKwArr[activePara].pop();redrawKw(activePara);}
+}
+function doClear(){
+  if(activePara<0)return;
+  paraStrokes[activePara]=[];paraKwArr[activePara]=[];redrawP(activePara);redrawKw(activePara);
+}
+
+// ═══════════════════════════════════════════════════════
+// 타이머
+// ═══════════════════════════════════════════════════════
+function startTimer(){
+  timerVal=90;updTimer();
+  timerInt=setInterval(()=>{timerVal--;if(timerVal<=0){clearInterval(timerInt);timerVal=0;}updTimer();},1000);
+}
+function stopTimer(){clearInterval(timerInt);}
+function updTimer(){
+  const e=document.getElementById('timer-num'),f=document.getElementById('timer-fill');
+  e.textContent=timerVal+'s';
+  const col=timerVal>45?'var(--green)':timerVal>20?'var(--orange)':'var(--red)';
+  e.style.color=col;f.style.width=(timerVal/90*100)+'%';f.style.background=col;
+}
+
+// ═══════════════════════════════════════════════════════
+// 제출 & 채점
+// ═══════════════════════════════════════════════════════
+async function submitWork(){
+  if(submitting)return;submitting=true;
+  stopTimer();
+  const btn=document.getElementById('sub-btn');btn.disabled=true;btn.textContent='채점 중...';
+  show('sc-load');document.getElementById('load-txt').textContent='채점 중...';
+
+  // 단락별 핵심 주장 OCR
+  const kwTexts=[];
+  for(let i=0;i<passage.paragraphs.length;i++){
+    if(!(paraKwArr[i]?.length)){kwTexts.push('(없음)');continue;}
+    try{
+      const img=document.getElementById(`kwcvs-${i}`).toDataURL('image/png').split(',')[1];
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,
+          system:'수능 국어 핵심 주장 손글씨 OCR 전문가. 한국어 악필 손글씨도 문맥상 가장 가능한 텍스트로 읽어낸다. JSON만 반환.',
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:'image/png',data:img}},
+            {type:'text',text:'이 이미지는 수능 국어 지문의 핵심 주장을 손글씨로 쓴 것입니다. "~의 ~와 ~" 형태의 짧은 구절이 적혀있습니다. 악필이더라도 최대한 읽어서 JSON으로만 응답: {"text":"읽은텍스트"}'}
+          ]}]})});
+      const od=await r.json();
+      const txt=(od.content||[]).map(b=>b.text||'').join('');
+      const m=txt.match(/\{[\s\S]*\}/);
+      kwTexts.push(m?JSON.parse(m[0]).text||'(없음)':'(없음)');
+    }catch{kwTexts.push('(인식 실패)');}
+  }
+
+  // 단락별 표시 단어 수집
+  const markedPerPara=paraStrokes.map(ss=>[...new Set(ss.filter(s=>!s.eraser).flatMap(s=>s.words||[]))]);
+
+  // 채점 + 선지 꼬기 한 번에
+  const paraInfo=passage.paragraphs.map((p,i)=>{
+    const uw=(p.underlineWords||[]).map((u,j)=>'밑줄'+(j+1)+':'+u).join(' / ');
+    return '단락'+(i+1)+'[정답:'+p.keyword+'][학생OCR:'+kwTexts[i]+']['+( uw||'밑줄없음')+']';
+  }).join(' | ');
+
+  // 채점 (단순하게)
+  let result=null;
+  try{
+    const gradingPrompt='수능 국어 채점.\n\n'+paraInfo+'\n\n학생 OCR이 정답 주장과 의미상 유사하면 hit:true. OCR 오인식 감안.\n\nJSON만: {"score":80,"grade":"B","paraResults":[{"hit":true,"comment":"코멘트"}],"feedback":"피드백","tip":"팁"}';
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
+        system:'JSON만 출력. 다른 텍스트 금지.',
+        messages:[{role:'user',content:gradingPrompt}]})});
+    const d=await r.json();
+    const txt=(d.content||[]).map(b=>b.text||'').join('');
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(m)result=JSON.parse(m[0]);
+  }catch(e){console.warn('채점오류',e);}
+  if(!result)result={score:0,grade:'D',paraResults:passage.paragraphs.map(()=>({hit:false,comment:''})),feedback:'핵심 주장을 손글씨로 쓰고 다시 제출해주세요.',tip:''};
+
+  // 캔버스 이미지 캡처
+  const kwImgs=passage.paragraphs.map((_,i)=>{
+    if(!(paraKwArr[i]?.length))return null;
+    return document.getElementById(`kwcvs-${i}`)?.toDataURL('image/png')||null;
+  });
+
+  renderResult(result,kwTexts,kwImgs);
+  btn.disabled=false;btn.textContent='제출 → AI 채점';submitting=false;
+  generateTwists();
+}
+
+async function generateTwists(){
+  const allUnderlines=[];
+  passage.paragraphs.forEach((p,i)=>{
+    (p.underlineWords||[]).forEach(u=>{ allUnderlines.push({para:i,text:u}); });
+  });
+  if(!allUnderlines.length)return;
+
+  const linesList=allUnderlines.map((u,idx)=>(idx+1)+'. [단락'+(u.para+1)+'] '+u.text).join('\n');
+  const twistPrompt='다음 밑줄 구절들에 대해 수능 선지에서 어떻게 뒤틀어 출제하는지 예시 1개씩.\n\n'+linesList+'\n\nJSON만: {"results":[{"idx":0,"para":0,"twist":"원문 → 틀린선지"}]}';
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        system:'JSON만 출력. 다른 텍스트 금지.',
+        messages:[{role:'user',content:twistPrompt}]})});
+    const d=await r.json();
+    const txt=(d.content||[]).map(b=>b.text||'').join('');
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(!m)return;
+    const parsed=JSON.parse(m[0]);
+    if(!parsed||!parsed.results)return;
+
+    const paraMap={};
+    parsed.results.forEach(function(item){
+      const pi=typeof item.para==='number'?item.para:(allUnderlines[item.idx]?allUnderlines[item.idx].para:0);
+      if(!paraMap[pi])paraMap[pi]=[];
+      if(item.twist)paraMap[pi].push(item.twist);
+    });
+
+    Object.keys(paraMap).forEach(function(pi){
+      const twists=paraMap[pi];
+      const el=document.getElementById('twist-'+pi);
+      if(!el||!twists.length)return;
+      el.style.cssText='margin-top:14px;border-top:1px solid #e5e5ea;padding-top:12px';
+      const header=document.createElement('div');
+      header.style.cssText='font-size:12px;font-weight:700;color:#ff9500;margin-bottom:8px';
+      header.textContent='⚠️ 선지에서 이렇게 꼬아요';
+      el.innerHTML='';
+      el.appendChild(header);
+      twists.forEach(function(t){
+        const box=document.createElement('div');
+        box.style.cssText='background:#fff8f0;border:1.5px solid #ffd199;border-radius:8px;padding:11px 13px;margin-bottom:7px;font-size:13px;color:#1c1c1e;line-height:1.8';
+        box.textContent=t;
+        el.appendChild(box);
+      });
+    });
+  }catch(e){console.warn('선지꼬기오류',e);}
+}
+
+// ═══════════════════════════════════════════════════════
+// 결과 렌더
+// ═══════════════════════════════════════════════════════
+const GC={S:'#34c759',A:'#30d158',B:'#ff9500',C:'#ff6b00',D:'#ff3b30'};
+
+function renderResult(result,kwTexts,kwImgs){
+  const sc=result.score||0,gr=result.grade||'D';
+  document.getElementById('r-score').innerHTML=`<span style="color:${GC[gr]||'#1c1c1e'}">${sc}</span><span style="font-size:20px;font-weight:400;color:var(--t3)"> 점</span>`;
+  const gb=document.getElementById('r-grade');gb.textContent=gr;gb.style.background=GC[gr]||'#8e8e93';
+
+  const rp=document.getElementById('result-paragraphs');rp.innerHTML='';
+  passage.paragraphs.forEach((para,i)=>{
+    const pr=result.paraResults?.[i]||{};const hit=pr.hit===true;
+    const div=document.createElement('div');div.className='result-para card';
+    div.innerHTML=`
+      <div class="para-num" style="margin-bottom:8px">단락 ${i+1}</div>
+      <div class="rpwrap" id="rpwrap-${i}">
+        <p class="rptext" id="rptext-${i}"></p>
+        <canvas id="rcvs-stu-${i}" class="rcvs" style="z-index:2"></canvas>
+        <canvas id="rcvs-ans-${i}" class="rcvs" style="z-index:3"></canvas>
+      </div>
+      ${kwImgs[i]?`
+      <div class="kw-compare" style="margin-top:10px">
+        <div class="kw-mine">
+          <div class="kw-sublabel">내 손글씨</div>
+          <img src="${kwImgs[i]}" style="width:100%;border-radius:6px;background:#f2f2f7;max-height:55px;object-fit:contain;display:block"/>
+        </div>
+        <div class="check-icon">${hit?'✅':'❌'}</div>
+        <div class="kw-ans ${hit?'hit':'miss'}">
+          <div class="kw-sublabel">정답 핵심 주장</div>
+          <div class="kw-ans-text ${hit?'hit':'miss'}">${para.keyword}</div>
+        </div>
+      </div>`:`
+      <div style="margin-top:10px;background:var(--card2);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--t3)">
+        ✏️ 핵심 주장 미작성 &nbsp;→&nbsp; <span style="color:var(--t2);font-family:var(--serif)">${para.keyword}</span>
+      </div>`}
+      ${pr.comment?`<div style="font-size:12px;color:var(--t3);margin-top:8px;padding:0 2px">${pr.comment}</div>`:''}`;
+    // twist 컨테이너 별도 생성 (백틱 ID 문제 방지)
+    const twistDiv=document.createElement('div');
+    twistDiv.id='twist-'+i;
+    div.appendChild(twistDiv);
+    rp.appendChild(div);
+
+    document.getElementById('rptext-'+i).innerHTML=
+      para.text.split(/(\s+)/).map(w=>w.trim()
+        ?'<span data-word="'+w.replace(/[.,!?;:'"()「」『』\/]/g,'')+'" data-rpara="'+i+'">'+w+'</span>'
+        :w).join('');
+  });
+
+  show('sc-result');
+
+  // 캔버스 + 선지꼬기를 순차적으로
+  setTimeout(()=>{
+    passage.paragraphs.forEach(function(_,i){
+      const wrap=document.getElementById('rpwrap-'+i);if(!wrap)return;
+      const r=wrap.getBoundingClientRect();
+      const W=Math.round(r.width),H=Math.round(r.height);
+      const cs=document.getElementById('rcvs-stu-'+i);
+      cs.width=W;cs.height=H;
+      const ctxS=cs.getContext('2d');
+      (paraStrokes[i]||[]).filter(function(s){return !s.eraser;}).forEach(function(s){drawStroke(ctxS,s,'rgba(180,180,180,0.45)',1);});
+      const ca=document.getElementById('rcvs-ans-'+i);
+      ca.width=W;ca.height=H;
+      drawAnswers(ca.getContext('2d'),wrap,i);
+    });
+  },400);
+
+  const fb=document.getElementById('r-feedback');
+  const tp=document.getElementById('r-tip');
+  const gd=document.getElementById('r-guide');
+  if(result.feedback){fb.innerHTML=`<span>📝</span><span>${result.feedback}</span>`;fb.style.display='';}
+  else fb.style.display='none';
+  if(result.tip){tp.innerHTML=`<span>💡</span><span>${result.tip}</span>`;tp.style.display='';}
+  else tp.style.display='none';
+  if(passage.annotationGuide){gd.innerHTML=`<span>📌</span><div><div style="font-size:10px;font-weight:600;color:var(--blue);letter-spacing:.5px;margin-bottom:3px">표시 가이드</div>${passage.annotationGuide}</div>`;gd.style.display='';}
+  else gd.style.display='none';
+}
+
+function drawAnswers(ctx,wrap,paraIdx){
+  const para=passage.paragraphs[paraIdx];
+  const pr=wrap.getBoundingClientRect();
+  const allSpans=Array.from(wrap.querySelectorAll(`span[data-rpara="${paraIdx}"]`));
+
+  // 단어 매칭 함수 (유연하게)
+  const matches=(spanWord,target)=>{
+    const sw=spanWord||'';const t=target||'';
+    return sw===t||sw.includes(t)||t.includes(sw);
+  };
+
+  // 이미 기호가 그려진 단어 추적 (중첩 방지)
+  const usedForCircle=new Set();
+  const usedForTriangle=new Set();
+
+  // ── ① 동그라미 (파란색) ──
+  // 정확한 단어 매칭 — "숭고"가 "수학적 숭고"에 중복 매칭되는 것 방지
+  const norm=s=>(s||'').replace(/[.,!?;:'"()「」『』\/\s]/g,'');
+  const circleTargets=para.circleWords||[];
+
+  circleTargets.forEach(target=>{
+    allSpans.forEach(span=>{
+      const sw=span.dataset.word||'';
+      // 정확히 일치하거나, span이 target을 포함하는 경우만 (역방향 제외)
+      // 단, 더 긴 circleTarget이 이 span에 해당하면 skip
+      const exactMatch=norm(sw)===norm(target)||sw===target;
+      const swIncludesTarget=sw.includes(target)&&target.length>=2;
+      if(!exactMatch&&!swIncludesTarget)return;
+      // 이 span이 더 긴 circleTarget에도 매칭된다면 skip (중복 방지)
+      const longerMatch=circleTargets.some(other=>
+        other!==target&&other.length>target.length&&(sw.includes(other)||other.includes(sw))
+      );
+      if(longerMatch)return;
+
+      usedForCircle.add(span);
+      const sr=span.getBoundingClientRect();
+      const x=sr.left-pr.left,y=sr.top-pr.top,sw2=sr.width,sh=sr.height;
+      ctx.save();ctx.strokeStyle='#007aff';ctx.lineWidth=2.5;ctx.globalAlpha=1;
+      ctx.beginPath();
+      // 단어에 딱 맞게 — 너무 크지 않게
+      ctx.ellipse(x+sw2/2,y+sh/2,sw2/2+7,sh/2+6,0,0,Math.PI*2);
+      ctx.stroke();ctx.restore();
+    });
+  });
+
+  // ── ② 세모 (주황색) — 정확한 매칭만 ──
+  (para.triangleWords||[]).forEach(w=>{
+    allSpans.forEach(span=>{
+      const sw=span.dataset.word||'';
+      if(norm(sw)!==norm(w)&&sw!==w)return;
+      usedForTriangle.add(span);
+      const sr=span.getBoundingClientRect();
+      const x=sr.left-pr.left,y=sr.top-pr.top,sw2=sr.width,sh=sr.height;
+      ctx.save();ctx.strokeStyle='#ff9500';ctx.lineWidth=2.8;ctx.globalAlpha=1;
+      ctx.beginPath();ctx.moveTo(x+sw2/2,y-7);ctx.lineTo(x-7,y+sh+5);ctx.lineTo(x+sw2+7,y+sh+5);ctx.closePath();
+      ctx.stroke();ctx.restore();
+    });
+  });
+
+  // ── ③ 밑줄 (빨간색) — 동그라미·세모 있는 단어 제외, 길이 2 이상 단어만 ──
+  (para.underlineWords||[]).forEach(phrase=>{
+    const words=phrase.replace(/[.,!?;:'"()「」『』]/g,'').split(/\s+/).filter(w=>w.length>1);
+    if(!words.length)return;
+    const lineMap={};
+    allSpans.forEach(span=>{
+      if(usedForCircle.has(span)||usedForTriangle.has(span))return;
+      const sw=span.dataset.word||'';
+      if(!words.some(w=>sw.includes(w)||w.includes(sw)))return;
+      const sr=span.getBoundingClientRect();
+      const lineKey=Math.round((sr.top-pr.top)/2)*2;
+      if(!lineMap[lineKey])lineMap[lineKey]={l:sr.left-pr.left,r:sr.right-pr.left,b:sr.bottom-pr.top};
+      else{lineMap[lineKey].l=Math.min(lineMap[lineKey].l,sr.left-pr.left);lineMap[lineKey].r=Math.max(lineMap[lineKey].r,sr.right-pr.left);}
+    });
+    Object.values(lineMap).forEach(({l,r,b})=>{
+      ctx.save();ctx.strokeStyle='#ff3b30';ctx.lineWidth=2.8;ctx.globalAlpha=1;
+      ctx.beginPath();ctx.moveTo(l,b+3);ctx.lineTo(r,b+3);ctx.stroke();ctx.restore();
+    });
+  });
+
+  // ── ④ 괄호 (회색) — ( 시작단어 앞 ... 끝단어 뒤 ) ──
+  const ranges=[...(para.parenRanges||[])];
+
+  ranges.forEach(({start,end})=>{
+    // 시작 span
+    let startSpan=null;
+    for(const span of allSpans){
+      const sw=span.dataset.word||'';
+      if(norm(sw)===norm(start)||sw===start){startSpan=span;break;}
+    }
+    if(!startSpan)return;
+
+    // 끝 span: startSpan 이후에서 찾고, 없으면 마지막 span
+    let endSpan=null;
+    let afterStart=false;
+    for(const span of allSpans){
+      if(span===startSpan)afterStart=true;
+      if(!afterStart)continue;
+      const sw=span.dataset.word||'';
+      if(norm(sw)===norm(end)||sw.includes(end)||end.includes(sw))endSpan=span;
+    }
+    if(!endSpan)endSpan=allSpans[allSpans.length-1];
+
+    const sr1=startSpan.getBoundingClientRect();
+    const sr2=endSpan.getBoundingClientRect();
+    const x1=sr1.left-pr.left,y1=sr1.top-pr.top,h1=sr1.height;
+    const x2=sr2.right-pr.left,y2=sr2.top-pr.top,h2=sr2.height;
+
+    ctx.save();ctx.strokeStyle='#3a3a3c';ctx.lineWidth=2;ctx.globalAlpha=.8;
+    // ( 시작
+    ctx.beginPath();
+    ctx.moveTo(x1-2,y1-2);ctx.bezierCurveTo(x1-7,y1+h1/2,x1-7,y1+h1/2,x1-2,y1+h1+2);
+    ctx.stroke();
+    // ) 끝
+    ctx.beginPath();
+    ctx.moveTo(x2+2,y2-2);ctx.bezierCurveTo(x2+7,y2+h2/2,x2+7,y2+h2/2,x2+2,y2+h2+2);
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 네비게이션
+// ═══════════════════════════════════════════════════════
+function nextOrHome(){
+  if(isPastedPassage){goHome();switchTab('folder');}
+  else startBuiltin();
+}
+function goHome(){
+  paraStrokes=[];paraKwArr=[];passage=null;activePara=-1;
+  document.getElementById('paragraphs-wrap').innerHTML='';
+  document.getElementById('result-paragraphs').innerHTML='';
+  show('sc-home');
+}
+
+// ═══════════════════════════════════════════════════════
+// 에러 헬퍼
+// ═══════════════════════════════════════════════════════
+function showErr(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.style.display='';}}
+function hideErr(id){const e=document.getElementById(id);if(e)e.style.display='none';}
+
+// ═══════════════════════════════════════════════════════
+// 초기화
+// ═══════════════════════════════════════════════════════
+window.addEventListener('resize',()=>{
+  if(document.getElementById('sc-read').classList.contains('on'))
+    passage?.paragraphs?.forEach((_,i)=>syncSize(i));
+});
+</script>
+</body>
+</html>
