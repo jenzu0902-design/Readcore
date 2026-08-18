@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>우리 가족 갤러리</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#faf6f0;--card:#ffffff;--card2:#f5efe6;
@@ -24,6 +25,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--sa
 .hd-logo{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.3px;color:var(--ink)}
 .hd-logo span{color:var(--accent)}
 .hd-sub{font-size:11px;color:var(--sub);margin-top:1px}
+#hd-user{display:flex;align-items:center;gap:8px}
 
 .nav{display:flex;gap:2px;padding:8px 12px;background:rgba(250,246,240,.94);backdrop-filter:blur(20px);position:sticky;top:56px;z-index:190;border-bottom:1px solid var(--line);overflow-x:auto}
 .nav-btn{flex:1;white-space:nowrap;padding:9px 6px;border:none;background:none;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s}
@@ -45,12 +47,22 @@ main{flex:1;padding:16px 16px 90px}
 .btn{width:100%;padding:14px;border-radius:var(--radius-s);background:var(--accent);color:#fff;font-family:var(--sans);font-size:15px;font-weight:700;border:none;cursor:pointer;letter-spacing:-.2px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn-outline{width:100%;padding:13px;border-radius:var(--radius-s);background:transparent;border:1.5px solid var(--accent);color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer}
-.btn-s{padding:7px 13px;border-radius:var(--radius-xs);font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);background:var(--accent-soft2);color:var(--accent)}
+.btn-s{padding:7px 13px;border-radius:var(--radius-xs);font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);background:var(--accent-soft2);color:var(--accent);white-space:nowrap}
 .btn-s-danger{background:rgba(200,84,80,.1);color:var(--red)}
+.btn-s:disabled{opacity:.5;cursor:not-allowed}
 
 .stat-row{display:flex;gap:16px;margin-bottom:2px}
 .stat-num{font-size:22px;font-weight:700;color:var(--ink)}
 .stat-lbl{font-size:11px;color:var(--sub)}
+
+/* 입력 */
+input[type=text],input[type=password],input[type=date],textarea{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:var(--radius-s);color:var(--ink);font-family:var(--sans);font-size:15px;padding:12px 14px;outline:none}
+input[type=text]:focus,input[type=password]:focus,input[type=date]:focus,textarea:focus{border-color:var(--accent)}
+.err{color:var(--red);font-size:12.5px;margin-top:2px;line-height:1.6}
+.input-label{font-size:12px;color:var(--sub);margin-bottom:5px;font-weight:600}
+
+/* 로그인 */
+#sc-login{max-width:360px;margin:14vh auto 0}
 
 /* 사진 그리드 */
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px}
@@ -74,14 +86,13 @@ main{flex:1;padding:16px 16px 90px}
 .subseg{display:flex;background:var(--card2);border-radius:10px;padding:2px;margin-bottom:14px}
 .subseg-btn{flex:1;padding:8px 4px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
 .subseg-btn.on{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:var(--radius-s);color:var(--ink);font-family:var(--sans);font-size:15px;padding:11px 14px;outline:none}
 
 /* 성장 앨범 */
 .growth-header{display:flex;gap:10px;margin-bottom:14px}
 .growth-bday{font-size:13px;color:var(--sub);background:var(--card2);padding:6px 12px;border-radius:20px}
 .growth-list{display:flex;flex-direction:column;gap:10px}
 .growth-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius-s);padding:8px;border:1px solid var(--line);cursor:pointer}
-.growth-item img{width:64px;height:64px;object-fit:cover;border-radius:9px;flex-shrink:0}
+.growth-item img{width:64px;height:64px;object-fit:cover;border-radius:9px;flex-shrink:0;background:var(--card2)}
 .growth-item-date{font-size:13px;font-weight:600;color:var(--ink)}
 .growth-item-age{font-size:12px;color:var(--accent);margin-top:2px;font-weight:600}
 
@@ -90,9 +101,9 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
 .dropzone.drag{border-color:var(--accent);background:var(--accent-soft)}
 .dropzone-ico{font-size:30px;margin-bottom:8px}
 .pending-card{background:var(--card2);border-radius:var(--radius-s);padding:12px;margin-bottom:10px;display:flex;gap:12px}
-.pending-thumb{width:76px;height:76px;object-fit:cover;border-radius:9px;flex-shrink:0}
+.pending-thumb{width:76px;height:76px;object-fit:cover;border-radius:9px;flex-shrink:0;background:var(--card)}
 .pending-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-.pending-fields input[type=text],.pending-fields input[type=date],.pending-fields textarea{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:13px;padding:7px 9px;outline:none}
+.pending-fields input[type=text],.pending-fields input[type=date],.pending-fields textarea{padding:7px 9px;font-size:13px}
 .pending-fields textarea{resize:none;font-family:var(--sans)}
 .pending-chips{display:flex;flex-wrap:wrap;gap:5px}
 .pending-chips .chip{padding:4px 10px;font-size:11.5px}
@@ -103,7 +114,7 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
 .person-name{font-weight:600;font-size:14px;flex:1}
 .person-bday{font-size:12px;color:var(--sub)}
 .add-person-row{display:flex;gap:6px;margin-top:10px}
-.add-person-row input[type=text]{flex:1.4;background:var(--card);border:1.5px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans)}
+.add-person-row input[type=text]{flex:1.4;padding:8px 10px;font-size:13px}
 .add-person-row input[type=date]{flex:1;padding:8px 10px;font-size:13px}
 
 /* 라이트박스 */
@@ -111,7 +122,7 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
 #lightbox.on{display:flex}
 .lb-topbar{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:5}
 .lb-icobtn{background:rgba(255,255,255,.14);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.lb-imgwrap{max-width:100%;max-height:56vh;display:flex;align-items:center;justify-content:center}
+.lb-imgwrap{max-width:100%;max-height:56vh;display:flex;align-items:center;justify-content:center;min-height:120px}
 .lb-img{max-width:100%;max-height:56vh;border-radius:10px;object-fit:contain}
 .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.14);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
 .lb-prev{left:8px}.lb-next{right:8px}
@@ -123,11 +134,11 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
 .lb-desc{font-size:13px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
 .lb-btnrow{display:flex;gap:8px;margin-top:12px}
 .lb-btnrow .btn-s{flex:1;text-align:center;padding:9px}
-.lb-edit input[type=text],.lb-edit input[type=date],.lb-edit textarea{width:100%;background:var(--card2);border:1.5px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans);margin-bottom:8px;outline:none}
+.lb-edit input[type=text],.lb-edit input[type=date],.lb-edit textarea{background:var(--card2);padding:8px 10px;font-size:13px;margin-bottom:8px}
 .lb-edit textarea{resize:none;min-height:60px}
 .lb-edit-label{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px}
 
-#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#2c2620;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:600;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#2c2620;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:600;box-shadow:0 4px 14px rgba(0,0,0,.2);max-width:88%;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #toast.err{background:var(--red)}
 
@@ -143,9 +154,29 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
     <div class="hd-logo">우리<span>家族</span></div>
     <div class="hd-sub">가족의 순간들을 시간 속에 담다</div>
   </div>
+  <div id="hd-user"></div>
 </div>
 
-<div class="nav">
+<!-- 로그인 -->
+<div id="sc-login" class="screen on">
+  <div class="card" style="text-align:center">
+    <div style="font-size:15px;font-weight:700;margin-bottom:6px">🔒 가족만 볼 수 있어요</div>
+    <div style="font-size:12.5px;color:var(--sub);margin-bottom:20px;line-height:1.7">가족 관리자가 만들어 준 이메일과 비밀번호로 로그인하세요</div>
+    <div style="text-align:left;margin-bottom:12px">
+      <div class="input-label">이메일</div>
+      <input type="text" id="login-email" placeholder="you@example.com" autocomplete="username"/>
+    </div>
+    <div style="text-align:left;margin-bottom:10px">
+      <div class="input-label">비밀번호</div>
+      <input type="password" id="login-pw" placeholder="비밀번호" autocomplete="current-password"/>
+    </div>
+    <p id="login-err" class="err" style="display:none;text-align:left;margin-bottom:8px"></p>
+    <button class="btn" id="login-btn" onclick="doLogin()" style="margin-top:8px">로그인</button>
+    <div style="font-size:11.5px;color:var(--sub);margin-top:16px;line-height:1.7">계정이 없다면 가족 관리자에게 문의하세요</div>
+  </div>
+</div>
+
+<div class="nav" id="main-nav" style="display:none">
   <button class="nav-btn on" data-screen="timeline" onclick="showScreen('timeline')">🕰 타임라인</button>
   <button class="nav-btn" data-screen="search" onclick="showScreen('search')">🔍 검색</button>
   <button class="nav-btn" data-screen="memories" onclick="showScreen('memories')">✨ 추억</button>
@@ -153,7 +184,7 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
   <button class="nav-btn" data-screen="add" onclick="showScreen('add')">➕ 추가</button>
 </div>
 
-<main>
+<main id="main-content" style="display:none">
 
 <!-- 타임라인 -->
 <div id="sc-timeline" class="screen on">
@@ -231,7 +262,7 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
   </div>
   <div id="pending-list"></div>
   <div class="card" id="pending-save-card" style="display:none">
-    <button class="btn" onclick="saveAllPending()">모두 저장하기</button>
+    <button class="btn" id="save-pending-btn" onclick="saveAllPending()">모두 저장하기</button>
   </div>
 
   <div class="card">
@@ -246,13 +277,14 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
   </div>
 
   <div class="card">
-    <div class="card-label">백업 · 복원</div>
-    <div style="font-size:12.5px;color:var(--sub);margin-bottom:12px;line-height:1.7">사진은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 안전하게 보관하려면 백업 파일을 내려받으세요.</div>
-    <div class="btn-row" style="display:flex;gap:8px">
-      <button class="btn-outline" style="flex:1" onclick="exportBackup()">⬇ 백업 내보내기</button>
-      <button class="btn-outline" style="flex:1" onclick="document.getElementById('import-input').click()">⬆ 복원하기</button>
+    <div class="card-label">계정</div>
+    <div style="font-size:13px;color:var(--ink2);margin-bottom:12px">로그인 계정: <strong id="acct-email"></strong></div>
+    <div class="input-label">새 비밀번호로 변경</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input type="password" id="acct-newpw" placeholder="새 비밀번호 (6자 이상)" style="flex:1"/>
+      <button class="btn-s" onclick="changePassword()">변경</button>
     </div>
-    <input type="file" id="import-input" accept="application/json" style="display:none"/>
+    <button class="btn-outline" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
 
@@ -297,55 +329,23 @@ input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line
 
 <script>
 // ═══════════════════════════════════════════════════════
-// IndexedDB
+// Supabase 설정 — 본인의 프로젝트 값으로 바꿔주세요
+// (Supabase 대시보드 → Project Settings → API 에서 확인)
 // ═══════════════════════════════════════════════════════
-let dbInstance=null;
-function openDB(){
-  return new Promise((resolve,reject)=>{
-    if(dbInstance)return resolve(dbInstance);
-    const req=indexedDB.open('familyGalleryDB',1);
-    req.onupgradeneeded=(e)=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains('photos'))db.createObjectStore('photos',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('blobs'))db.createObjectStore('blobs',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('people'))db.createObjectStore('people',{keyPath:'id'});
-    };
-    req.onsuccess=()=>{dbInstance=req.result;resolve(dbInstance);};
-    req.onerror=()=>reject(req.error);
-  });
-}
-async function dbGetAll(store){
-  const db=await openDB();
-  return new Promise((resolve,reject)=>{
-    const req=db.transaction(store,'readonly').objectStore(store).getAll();
-    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
-  });
-}
-async function dbGet(store,id){
-  const db=await openDB();
-  return new Promise((resolve,reject)=>{
-    const req=db.transaction(store,'readonly').objectStore(store).get(id);
-    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
-  });
-}
-async function dbPut(store,obj){
-  const db=await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(obj);
-    tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
-  });
-}
-async function dbDelete(store,id){
-  const db=await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id);
-    tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
-  });
-}
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const BUCKET = 'family-photos';
+
+const CONFIGURED = SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('YOUR-PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR-ANON');
+const sb = CONFIGURED && typeof supabase !== 'undefined' ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 // ═══════════════════════════════════════════════════════
 // 유틸
 // ═══════════════════════════════════════════════════════
+function uuid(){
+  if(typeof crypto!=='undefined'&&crypto.randomUUID)return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;const v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
+}
 function pad(n){return String(n).padStart(2,'0');}
 function fmtDateISO(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
 function todayStr(){return fmtDateISO(new Date());}
@@ -356,7 +356,7 @@ function fmtDateKR(dateStr){
   return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
 }
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function peopleNames(ids){return ids.map(id=>PEOPLE.find(pp=>pp.id===id)?.name).filter(Boolean).join(', ');}
+function peopleNames(ids){return (ids||[]).map(id=>PEOPLE.find(pp=>pp.id===id)?.name).filter(Boolean).join(', ');}
 function emptyStateHTML(msg){return `<div class="empty">${msg||'아직 사진이 없어요<br>➕ 추가 탭에서 첫 사진을 올려보세요'}</div>`;}
 function computeAge(birth,target){
   const b=new Date(birth+'T00:00:00'),t=new Date(target+'T00:00:00');
@@ -373,7 +373,7 @@ function computeAge(birth,target){
 function showToast(msg,isErr){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className=isErr?'show err':'show';
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2600);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -427,7 +427,7 @@ async function readExifDate(file){
   }catch(e){return null;}
   return null;
 }
-function makeThumb(file){
+function makeThumbBlob(file){
   return new Promise((resolve)=>{
     const img=new Image();
     const url=URL.createObjectURL(file);
@@ -439,9 +439,9 @@ function makeThumb(file){
       const cvs=document.createElement('canvas');cvs.width=w;cvs.height=h;
       cvs.getContext('2d').drawImage(img,0,0,w,h);
       URL.revokeObjectURL(url);
-      resolve(cvs.toDataURL('image/jpeg',0.72));
+      cvs.toBlob(blob=>resolve(blob),'image/jpeg',0.72);
     };
-    img.onerror=()=>{URL.revokeObjectURL(url);resolve('');};
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(null);};
     img.src=url;
   });
 }
@@ -451,27 +451,92 @@ function makeThumb(file){
 // ═══════════════════════════════════════════════════════
 let PHOTOS=[],PEOPLE=[],PENDING=[];
 let activeGridList=[];
-let lightboxIdx=-1,lastLbUrl=null;
+let lightboxIdx=-1;
 let memTab='today',memSeason='봄';
 let growthPersonId=null;
 let searchState={q:'',people:[],year:'',season:''};
+let currentUserId=null;
+let signedUrlCache=new Map();
 
-async function init(){
-  try{
-    const photosRaw=await dbGetAll('photos');
-    PHOTOS=photosRaw.map(p=>({id:p.id,date:p.date,year:p.year,month:p.month,day:p.day,season:p.season,title:p.title||'',desc:p.desc||'',people:p.people||[],thumb:p.thumb,addedAt:p.addedAt||0}))
-      .sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
-    PEOPLE=await dbGetAll('people');
-  }catch(e){console.error(e);showToast('저장소를 여는 중 문제가 발생했어요',true);}
+// ═══════════════════════════════════════════════════════
+// 인증
+// ═══════════════════════════════════════════════════════
+function showLoginErr(msg){const el=document.getElementById('login-err');el.textContent=msg;el.style.display='';}
+function hideLoginErr(){document.getElementById('login-err').style.display='none';}
+
+async function doLogin(){
+  hideLoginErr();
+  const email=document.getElementById('login-email').value.trim();
+  const pw=document.getElementById('login-pw').value;
+  if(!email||!pw){showLoginErr('이메일과 비밀번호를 입력해주세요.');return;}
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='로그인 중...';
+  const {error}=await sb.auth.signInWithPassword({email,password:pw});
+  btn.disabled=false;btn.textContent='로그인';
+  if(error)showLoginErr('로그인 실패: 이메일 또는 비밀번호를 확인해주세요.');
+}
+async function doLogout(){
+  await sb.auth.signOut();
+}
+async function changePassword(){
+  const pwEl=document.getElementById('acct-newpw');
+  const pw=pwEl.value;
+  if(!pw||pw.length<6){showToast('비밀번호는 6자 이상이어야 해요',true);return;}
+  const {error}=await sb.auth.updateUser({password:pw});
+  if(error){showToast('변경 실패: '+error.message,true);return;}
+  pwEl.value='';
+  showToast('비밀번호가 변경되었어요');
+}
+
+function showLoginView(){
+  document.getElementById('sc-login').classList.add('on');
+  document.getElementById('main-nav').style.display='none';
+  document.getElementById('main-content').style.display='none';
+  document.getElementById('hd-user').innerHTML='';
+}
+async function enterApp(user){
+  document.getElementById('sc-login').classList.remove('on');
+  document.getElementById('main-nav').style.display='';
+  document.getElementById('main-content').style.display='';
+  document.getElementById('hd-user').innerHTML=`<span style="font-size:12px;color:var(--sub)">${escapeHtml(user.email)}</span><button class="lb-icobtn" style="width:28px;height:28px;background:var(--card2);color:var(--ink2)" onclick="doLogout()" title="로그아웃">⎋</button>`;
+  document.getElementById('acct-email').textContent=user.email;
   document.getElementById('mem-date').value=todayStr();
+  await loadData();
   showScreen('timeline');
+}
+async function handleAuthChange(session){
+  if(session&&session.user){
+    if(currentUserId===session.user.id)return;
+    currentUserId=session.user.id;
+    await enterApp(session.user);
+  }else{
+    currentUserId=null;
+    signedUrlCache=new Map();
+    showLoginView();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 데이터 로드
+// ═══════════════════════════════════════════════════════
+async function loadData(){
+  try{
+    const [{data:photosData,error:pErr},{data:peopleData,error:peErr}]=await Promise.all([
+      sb.from('photos').select('*').order('date',{ascending:false}).order('created_at',{ascending:false}),
+      sb.from('people').select('*').order('created_at',{ascending:true})
+    ]);
+    if(pErr)throw pErr;
+    if(peErr)throw peErr;
+    PHOTOS=(photosData||[]).map(p=>({...p,people:p.people||[]}));
+    PEOPLE=peopleData||[];
+  }catch(e){console.error(e);showToast('데이터를 불러오지 못했어요: '+e.message,true);}
 }
 
 // ═══════════════════════════════════════════════════════
 // 화면 전환
 // ═══════════════════════════════════════════════════════
 function showScreen(name){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('#main-content .screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('sc-'+name).classList.add('on');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.screen===name));
   if(name==='timeline'){activeGridList=PHOTOS;renderTimeline();renderStats();}
@@ -480,7 +545,6 @@ function showScreen(name){
   else if(name==='growth'){renderGrowthPeopleChips();renderGrowthTimeline();}
   else if(name==='add'){renderPending();renderPeopleManage();}
 }
-
 function renderStats(){
   document.getElementById('stat-photos').textContent=PHOTOS.length;
   document.getElementById('stat-people').textContent=PEOPLE.length;
@@ -488,11 +552,40 @@ function renderStats(){
 }
 
 // ═══════════════════════════════════════════════════════
+// 서명된 URL (private storage)
+// ═══════════════════════════════════════════════════════
+async function getSignedUrls(paths){
+  const uniquePaths=[...new Set(paths.filter(Boolean))];
+  const now=Date.now();
+  const missing=uniquePaths.filter(p=>{const c=signedUrlCache.get(p);return !c||c.expiresAt<now+120000;});
+  if(missing.length){
+    try{
+      const {data,error}=await sb.storage.from(BUCKET).createSignedUrls(missing,3600);
+      if(!error&&data){
+        data.forEach(d=>{if(d&&d.signedUrl&&d.path)signedUrlCache.set(d.path,{url:d.signedUrl,expiresAt:now+3500*1000});});
+      }
+    }catch(e){console.error(e);}
+  }
+  const result={};
+  uniquePaths.forEach(p=>{result[p]=signedUrlCache.get(p)?.url||'';});
+  return result;
+}
+async function hydrateThumbs(containerEl,photos){
+  const paths=photos.map(p=>p.thumb_path).filter(Boolean);
+  if(!paths.length)return;
+  const urls=await getSignedUrls(paths);
+  containerEl.querySelectorAll('img[data-path]').forEach(img=>{
+    const u=urls[img.dataset.path];
+    if(u)img.src=u;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 // 사진 그리드 조각
 // ═══════════════════════════════════════════════════════
 function photoThumbHTML(p){
   return `<div class="pgrid-item" onclick="openLightbox('${p.id}')">
-    <img src="${p.thumb}" loading="lazy" alt=""/>
+    <img data-path="${p.thumb_path}" loading="lazy" alt=""/>
     ${p.people.length?`<div class="pgrid-tag">${escapeHtml(peopleNames(p.people))}</div>`:''}
   </div>`;
 }
@@ -500,7 +593,7 @@ function photoThumbHTML(p){
 // ═══════════════════════════════════════════════════════
 // 타임라인
 // ═══════════════════════════════════════════════════════
-function renderTimeline(){
+async function renderTimeline(){
   const wrap=document.getElementById('timeline-wrap');
   if(!PHOTOS.length){wrap.innerHTML=emptyStateHTML();return;}
   const groups={};
@@ -511,6 +604,7 @@ function renderTimeline(){
     return `<div class="tl-group"><div class="tl-head">${y}년 ${parseInt(m)}월 <span class="tl-count">${groups[k].length}장</span></div>
       <div class="photo-grid">${groups[k].map(photoThumbHTML).join('')}</div></div>`;
   }).join('');
+  hydrateThumbs(wrap,PHOTOS);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -534,19 +628,21 @@ function toggleSearchPerson(id){
 }
 function setSearchYear(y){searchState.year=y;renderSearchFilters();performSearch();}
 function setSearchSeason(s){searchState.season=s;renderSearchFilters();performSearch();}
-function performSearch(){
+async function performSearch(){
   const q=searchState.q.trim().toLowerCase();
   const list=PHOTOS.filter(p=>{
-    if(q&&!((p.title||'').toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q)))return false;
+    if(q&&!((p.title||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)))return false;
     if(searchState.people.length&&!searchState.people.every(pid=>p.people.includes(pid)))return false;
     if(searchState.year!==''&&p.year!==searchState.year)return false;
     if(searchState.season&&p.season!==searchState.season)return false;
     return true;
   });
   activeGridList=list;
-  document.getElementById('search-results').innerHTML=list.length?
+  const el=document.getElementById('search-results');
+  el.innerHTML=list.length?
     `<div class="result-count">${list.length}장</div><div class="photo-grid">${list.map(photoThumbHTML).join('')}</div>`
     :emptyStateHTML('검색 결과가 없어요');
+  hydrateThumbs(el,list);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -574,7 +670,7 @@ function renderMemories(){
     renderSeason(memSeason);
   }
 }
-function renderOnThisDay(dateStr){
+async function renderOnThisDay(dateStr){
   const d=new Date(dateStr+'T00:00:00');
   if(isNaN(d))return;
   const mm=pad(d.getMonth()+1),dd=pad(d.getDate());
@@ -590,8 +686,9 @@ function renderOnThisDay(dateStr){
     return `<div class="tl-group"><div class="tl-head">${y}년 <span class="tl-count">${diff===0?'올해':diff+'년 전'}</span></div>
       <div class="photo-grid">${byYear[y].map(photoThumbHTML).join('')}</div></div>`;
   }).join('');
+  hydrateThumbs(el,matches);
 }
-function renderSeason(season){
+async function renderSeason(season){
   const matches=PHOTOS.filter(p=>p.season===season).sort((a,b)=>b.date.localeCompare(a.date));
   activeGridList=matches;
   const el=document.getElementById('memories-content');
@@ -600,6 +697,7 @@ function renderSeason(season){
   const years=Object.keys(byYear).sort((a,b)=>b-a);
   el.innerHTML=years.map(y=>`<div class="tl-group"><div class="tl-head">${y}년 ${season}</div>
     <div class="photo-grid">${byYear[y].map(photoThumbHTML).join('')}</div></div>`).join('');
+  hydrateThumbs(el,matches);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -611,7 +709,7 @@ function renderGrowthPeopleChips(){
   el.innerHTML=PEOPLE.map(p=>`<button class="chip ${growthPersonId===p.id?'on':''}" onclick="selectGrowthPerson('${p.id}')">${escapeHtml(p.name)}</button>`).join('');
 }
 function selectGrowthPerson(id){growthPersonId=id;renderGrowthPeopleChips();renderGrowthTimeline();}
-function renderGrowthTimeline(){
+async function renderGrowthTimeline(){
   const el=document.getElementById('growth-content');
   if(!growthPersonId){el.innerHTML=emptyStateHTML('가족을 선택하면 시간에 따라 변해온 모습을 볼 수 있어요');return;}
   const person=PEOPLE.find(p=>p.id===growthPersonId);
@@ -623,10 +721,11 @@ function renderGrowthTimeline(){
     <div class="growth-list">${matches.map(p=>{
       const age=person.birthdate?computeAge(person.birthdate,p.date):'';
       return `<div class="growth-item" onclick="openLightbox('${p.id}')">
-        <img src="${p.thumb}"/>
+        <img data-path="${p.thumb_path}"/>
         <div><div class="growth-item-date">${fmtDateKR(p.date)}</div>${age?`<div class="growth-item-age">${age}</div>`:''}${p.title?`<div style="font-size:12px;color:var(--ink2);margin-top:2px">${escapeHtml(p.title)}</div>`:''}</div>
       </div>`;
     }).join('')}</div>`;
+  hydrateThumbs(el,matches);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -643,14 +742,15 @@ async function handleFiles(fileList){
   const files=Array.from(fileList).filter(f=>f.type.startsWith('image/'));
   if(!files.length)return;
   for(const file of files){
-    const id='ph_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const id=uuid();
     let dateStr=await readExifDate(file);
     if(!dateStr){
       const lm=new Date(file.lastModified);
       dateStr=isNaN(lm)?todayStr():fmtDateISO(lm);
     }
-    const thumb=await makeThumb(file);
-    PENDING.push({id,file,thumb,date:dateStr,title:'',desc:'',people:[]});
+    const thumbBlob=await makeThumbBlob(file);
+    const previewUrl=thumbBlob?URL.createObjectURL(thumbBlob):'';
+    PENDING.push({id,file,thumbBlob,previewUrl,date:dateStr,title:'',description:'',people:[]});
   }
   renderPending();
   fileInput.value='';
@@ -661,13 +761,13 @@ function renderPending(){
   const saveCard=document.getElementById('pending-save-card');
   if(!PENDING.length){list.innerHTML='';saveCard.style.display='none';return;}
   saveCard.style.display='';
-  list.innerHTML=PENDING.map((item,idx)=>`
+  list.innerHTML=PENDING.map((item)=>`
     <div class="pending-card" data-id="${item.id}">
-      <img class="pending-thumb" src="${item.thumb}"/>
+      <img class="pending-thumb" src="${item.previewUrl}"/>
       <div class="pending-fields">
         <input type="date" value="${item.date}" onchange="updatePending('${item.id}','date',this.value)"/>
         <input type="text" placeholder="제목 (선택)" value="${escapeHtml(item.title)}" oninput="updatePending('${item.id}','title',this.value)"/>
-        <textarea rows="2" placeholder="설명 (선택)" oninput="updatePending('${item.id}','desc',this.value)">${escapeHtml(item.desc)}</textarea>
+        <textarea rows="2" placeholder="설명 (선택)" oninput="updatePending('${item.id}','description',this.value)">${escapeHtml(item.description)}</textarea>
         <div class="chips pending-chips">${PEOPLE.map(p=>`<button type="button" class="chip ${item.people.includes(p.id)?'on':''}" onclick="togglePendingPerson('${item.id}','${p.id}')">${escapeHtml(p.name)}</button>`).join('')}<button type="button" class="chip chip-add" onclick="quickAddPersonForPending('${item.id}')">+ 새 가족</button></div>
       </div>
       <button class="pending-rm" onclick="removePending('${item.id}')">✕</button>
@@ -680,38 +780,64 @@ function togglePendingPerson(id,pid){
   if(pos>=0)it.people.splice(pos,1);else it.people.push(pid);
   renderPending();
 }
-function quickAddPersonForPending(id){
-  const person=quickAddPerson();
+async function quickAddPersonForPending(id){
+  const person=await quickAddPerson();
   if(!person)return;
   const it=PENDING.find(p=>p.id===id);if(it)it.people.push(person.id);
   renderPending();
 }
-function removePending(id){PENDING=PENDING.filter(p=>p.id!==id);renderPending();}
+function removePending(id){
+  const it=PENDING.find(p=>p.id===id);
+  if(it&&it.previewUrl)URL.revokeObjectURL(it.previewUrl);
+  PENDING=PENDING.filter(p=>p.id!==id);renderPending();
+}
 
-function quickAddPerson(){
+async function quickAddPerson(){
   const name=prompt('가족 이름을 입력하세요');
   if(!name||!name.trim())return null;
-  const bd=prompt('생일 (선택, 예: 2020-05-14) 모르면 취소를 누르세요')||'';
-  const person={id:'pp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name:name.trim(),birthdate:/^\d{4}-\d{2}-\d{2}$/.test(bd.trim())?bd.trim():''};
-  PEOPLE.push(person);dbPut('people',person);
+  const bd=(prompt('생일 (선택, 예: 2020-05-14) 모르면 취소를 누르세요')||'').trim();
+  const person={id:uuid(),name:name.trim(),birthdate:/^\d{4}-\d{2}-\d{2}$/.test(bd)?bd:null,created_by:currentUserId};
+  const {error}=await sb.from('people').insert(person);
+  if(error){showToast('추가 실패: '+error.message,true);return null;}
+  PEOPLE.push(person);
   renderPeopleManage();
   return person;
 }
 
 async function saveAllPending(){
   if(!PENDING.length)return;
-  for(const item of PENDING){
-    const d=new Date(item.date+'T00:00:00');
-    if(isNaN(d)){showToast('날짜를 확인해주세요',true);return;}
-    const meta={id:item.id,date:item.date,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),title:item.title.trim(),desc:item.desc.trim(),people:item.people.slice(),thumb:item.thumb,addedAt:Date.now()};
-    await dbPut('photos',meta);
-    await dbPut('blobs',{id:item.id,blob:item.file});
-    PHOTOS.push({...meta});
+  const btn=document.getElementById('save-pending-btn');
+  btn.disabled=true;btn.textContent='저장 중...';
+  let failCount=0;
+  for(const item of PENDING.slice()){
+    try{
+      const d=new Date(item.date+'T00:00:00');
+      if(isNaN(d))throw new Error('날짜 오류');
+      const ext=((item.file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,''))||'jpg';
+      const storage_path=`originals/${item.id}.${ext}`;
+      const thumb_path=item.thumbBlob?`thumbs/${item.id}.jpg`:storage_path;
+      const up1=await sb.storage.from(BUCKET).upload(storage_path,item.file,{contentType:item.file.type||'image/jpeg'});
+      if(up1.error)throw up1.error;
+      if(item.thumbBlob){
+        const up2=await sb.storage.from(BUCKET).upload(thumb_path,item.thumbBlob,{contentType:'image/jpeg'});
+        if(up2.error)throw up2.error;
+      }
+      const row={id:item.id,date:item.date,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),
+        title:item.title.trim(),description:item.description.trim(),people:item.people.slice(),
+        storage_path,thumb_path,uploaded_by:currentUserId};
+      const {error:insErr}=await sb.from('photos').insert(row);
+      if(insErr)throw insErr;
+      if(item.previewUrl)URL.revokeObjectURL(item.previewUrl);
+      PENDING=PENDING.filter(p=>p.id!==item.id);
+    }catch(e){
+      console.error(e);failCount++;
+    }
   }
-  PENDING=[];
-  PHOTOS.sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
   renderPending();
-  showToast('사진이 저장되었어요');
+  btn.disabled=false;btn.textContent='모두 저장하기';
+  await loadData();
+  if(failCount)showToast(`${failCount}장 저장 실패, 나머지는 저장됐어요`,true);
+  else showToast('사진이 저장되었어요');
   showScreen('timeline');
 }
 
@@ -726,26 +852,29 @@ function renderPeopleManage(){
     <button class="btn-s btn-s-danger" onclick="deletePerson('${p.id}')">삭제</button>
   </div>`).join(''):'<div class="empty-inline">등록된 가족이 없어요</div>';
 }
-function addPersonForm(){
+async function addPersonForm(){
   const nameEl=document.getElementById('new-person-name'),bdEl=document.getElementById('new-person-bday');
   const name=nameEl.value.trim();if(!name)return;
-  const person={id:'pp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name,birthdate:bdEl.value||''};
-  PEOPLE.push(person);dbPut('people',person);
+  const person={id:uuid(),name,birthdate:bdEl.value||null,created_by:currentUserId};
+  const {error}=await sb.from('people').insert(person);
+  if(error){showToast('추가 실패: '+error.message,true);return;}
+  PEOPLE.push(person);
   nameEl.value='';bdEl.value='';
   renderPeopleManage();renderPending();
 }
 async function deletePerson(id){
   if(!confirm('이 가족 구성원을 삭제할까요? 사진에서도 태그가 제거돼요.'))return;
+  const {error}=await sb.from('people').delete().eq('id',id);
+  if(error){showToast('삭제 실패: '+error.message,true);return;}
   PEOPLE=PEOPLE.filter(p=>p.id!==id);
-  await dbDelete('people',id);
-  for(const p of PHOTOS){
-    if(p.people.includes(id)){
-      p.people=p.people.filter(x=>x!==id);
-      await dbPut('photos',{...p});
-    }
+  const affected=PHOTOS.filter(p=>p.people.includes(id));
+  for(const p of affected){
+    const newPeople=p.people.filter(x=>x!==id);
+    await sb.from('photos').update({people:newPeople}).eq('id',p.id);
+    p.people=newPeople;
   }
   if(growthPersonId===id)growthPersonId=null;
-  renderPeopleManage();renderPending();
+  renderPeopleManage();renderPending();reRenderCurrentGridScreen();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -763,12 +892,11 @@ async function openLightbox(id){
 async function renderLightbox(){
   const p=activeGridList[lightboxIdx];
   if(!p)return closeLightbox();
-  if(lastLbUrl){URL.revokeObjectURL(lastLbUrl);lastLbUrl=null;}
   const img=document.getElementById('lb-img');
-  img.src=p.thumb;
+  img.src='';
   try{
-    const rec=await dbGet('blobs',p.id);
-    if(rec&&rec.blob){lastLbUrl=URL.createObjectURL(rec.blob);img.src=lastLbUrl;}
+    const urls=await getSignedUrls([p.storage_path]);
+    img.src=urls[p.storage_path]||'';
   }catch(e){}
   document.getElementById('lb-date').textContent=fmtDateKR(p.date);
   document.getElementById('lb-people').innerHTML=p.people.map(pid=>{
@@ -776,12 +904,11 @@ async function renderLightbox(){
   }).join('');
   document.getElementById('lb-title').textContent=p.title||'';
   document.getElementById('lb-title').style.display=p.title?'':'none';
-  document.getElementById('lb-desc').textContent=p.desc||'';
-  document.getElementById('lb-desc').style.display=p.desc?'':'none';
+  document.getElementById('lb-desc').textContent=p.description||'';
+  document.getElementById('lb-desc').style.display=p.description?'':'none';
 }
 function closeLightbox(){
   document.getElementById('lightbox').classList.remove('on');
-  if(lastLbUrl){URL.revokeObjectURL(lastLbUrl);lastLbUrl=null;}
 }
 function lbStep(dir){
   const ni=lightboxIdx+dir;
@@ -798,7 +925,7 @@ function toggleLbEdit(){
     const p=activeGridList[lightboxIdx];
     document.getElementById('lb-edit-date').value=p.date;
     document.getElementById('lb-edit-title').value=p.title||'';
-    document.getElementById('lb-edit-desc').value=p.desc||'';
+    document.getElementById('lb-edit-desc').value=p.description||'';
     document.getElementById('lb-edit-people').innerHTML=PEOPLE.map(pp=>
       `<button type="button" class="chip ${p.people.includes(pp.id)?'on':''}" data-pid="${pp.id}" onclick="this.classList.toggle('on')">${escapeHtml(pp.name)}</button>`).join('')
       +`<button type="button" class="chip chip-add" onclick="quickAddPersonForLbEdit()">+ 새 가족</button>`;
@@ -807,8 +934,8 @@ function toggleLbEdit(){
     edit.style.display='none';view.style.display='';
   }
 }
-function quickAddPersonForLbEdit(){
-  const person=quickAddPerson();
+async function quickAddPersonForLbEdit(){
+  const person=await quickAddPerson();
   if(!person)return;
   toggleLbEdit();toggleLbEdit();
   document.querySelector(`#lb-edit-people [data-pid="${person.id}"]`)?.classList.add('on');
@@ -819,14 +946,16 @@ async function saveLbEdit(){
   const d=new Date(dateVal+'T00:00:00');
   if(isNaN(d)){showToast('날짜를 확인해주세요',true);return;}
   const selectedPeople=[...document.querySelectorAll('#lb-edit-people .chip.on')].map(c=>c.dataset.pid).filter(Boolean);
-  const updated={...p,date:dateVal,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),
+  const patch={date:dateVal,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),
     title:document.getElementById('lb-edit-title').value.trim(),
-    desc:document.getElementById('lb-edit-desc').value.trim(),
+    description:document.getElementById('lb-edit-desc').value.trim(),
     people:selectedPeople};
-  await dbPut('photos',updated);
+  const {error}=await sb.from('photos').update(patch).eq('id',p.id);
+  if(error){showToast('수정 실패: '+error.message,true);return;}
+  const updated={...p,...patch};
   const gi=PHOTOS.findIndex(x=>x.id===p.id);if(gi>=0)PHOTOS[gi]=updated;
   const ai=activeGridList.findIndex(x=>x.id===p.id);if(ai>=0)activeGridList[ai]=updated;
-  PHOTOS.sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
+  PHOTOS.sort((a,b)=>b.date.localeCompare(a.date));
   toggleLbEdit();
   await renderLightbox();
   reRenderCurrentGridScreen();
@@ -835,8 +964,12 @@ async function saveLbEdit(){
 async function deleteCurrentPhoto(){
   const p=activeGridList[lightboxIdx];if(!p)return;
   if(!confirm('이 사진을 삭제할까요?'))return;
-  await dbDelete('photos',p.id);
-  await dbDelete('blobs',p.id);
+  try{
+    const {error}=await sb.from('photos').delete().eq('id',p.id);
+    if(error)throw error;
+    const paths=[...new Set([p.storage_path,p.thumb_path].filter(Boolean))];
+    await sb.storage.from(BUCKET).remove(paths);
+  }catch(e){showToast('삭제 실패: '+e.message,true);return;}
   PHOTOS=PHOTOS.filter(x=>x.id!==p.id);
   activeGridList=activeGridList.filter(x=>x.id!==p.id);
   if(!activeGridList.length){closeLightbox();}
@@ -857,56 +990,20 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft')lbStep(-1);
   if(e.key==='ArrowRight')lbStep(1);
 });
+document.getElementById('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
 // ═══════════════════════════════════════════════════════
-// 백업 · 복원
+// 시작
 // ═══════════════════════════════════════════════════════
-function blobToBase64(blob){
-  return new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onload=()=>resolve(r.result);r.onerror=reject;
-    r.readAsDataURL(blob);
-  });
+if(!CONFIGURED){
+  document.getElementById('sc-login').innerHTML=`<div class="card" style="text-align:center">
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">⚙️ 설정이 필요해요</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.8">이 파일 상단의 <code>SUPABASE_URL</code>과 <code>SUPABASE_ANON_KEY</code>를<br>본인의 Supabase 프로젝트 값으로 바꿔주세요.</div>
+  </div>`;
+}else{
+  sb.auth.onAuthStateChange((event,session)=>handleAuthChange(session));
+  sb.auth.getSession().then(({data:{session}})=>handleAuthChange(session));
 }
-async function exportBackup(){
-  try{
-    const photos=await dbGetAll('photos');
-    const blobs=await dbGetAll('blobs');
-    const people=await dbGetAll('people');
-    const blobMap={};
-    for(const b of blobs)blobMap[b.id]=await blobToBase64(b.blob);
-    const data={version:1,exportedAt:new Date().toISOString(),people,photos,blobs:blobMap};
-    const jsonBlob=new Blob([JSON.stringify(data)],{type:'application/json'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(jsonBlob);
-    a.download=`family-gallery-backup-${todayStr()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showToast('백업 파일을 내려받았어요');
-  }catch(e){showToast('백업 실패: '+e.message,true);}
-}
-document.getElementById('import-input').addEventListener('change',e=>{
-  const file=e.target.files[0];
-  if(file)importBackupFile(file);
-  e.target.value='';
-});
-async function importBackupFile(file){
-  try{
-    const text=await file.text();
-    const data=JSON.parse(text);
-    if(!data.photos)throw new Error('형식이 올바르지 않아요');
-    for(const person of (data.people||[]))await dbPut('people',person);
-    for(const meta of data.photos)await dbPut('photos',meta);
-    for(const [id,dataUrl] of Object.entries(data.blobs||{})){
-      const blob=await (await fetch(dataUrl)).blob();
-      await dbPut('blobs',{id,blob});
-    }
-    await init();
-    showToast('복원이 완료되었어요');
-  }catch(e){showToast('복원 실패: '+e.message,true);}
-}
-
-window.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
