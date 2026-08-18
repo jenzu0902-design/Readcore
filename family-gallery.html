@@ -74,6 +74,19 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus,textare
 .tl-head{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;padding-left:2px}
 .tl-count{font-size:11px;font-weight:500;color:var(--sub)}
 
+/* 피드 뷰 */
+.feed{display:flex;flex-direction:column}
+.feed-card{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:16px}
+.feed-head{display:flex;align-items:center;gap:10px;padding:2px 2px 10px}
+.feed-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--gold));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.feed-headtext{flex:1;min-width:0}
+.feed-people{font-size:13px;font-weight:700;color:var(--ink)}
+.feed-date{font-size:11.5px;color:var(--sub)}
+.feed-imgwrap{width:100%;max-height:70vh;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:var(--radius-s);overflow:hidden;cursor:pointer}
+.feed-imgwrap img{width:100%;height:auto;max-height:70vh;object-fit:contain;display:block}
+.feed-caption{padding:10px 2px 0;font-size:13.5px;color:var(--ink2);line-height:1.6}
+.feed-caption strong{color:var(--ink);margin-right:4px}
+
 .empty{text-align:center;padding:48px 20px;color:var(--sub);font-size:14px;line-height:2}
 
 /* 검색 */
@@ -193,6 +206,10 @@ input[type=text]:focus,input[type=password]:focus,input[type=date]:focus,textare
       <div><div class="stat-num" id="stat-photos">0</div><div class="stat-lbl">장의 사진</div></div>
       <div><div class="stat-num" id="stat-people">0</div><div class="stat-lbl">명의 가족</div></div>
       <div><div class="stat-num" id="stat-years">0</div><div class="stat-lbl">년의 기록</div></div>
+    </div>
+    <div class="subseg" style="margin-top:14px;margin-bottom:0">
+      <button class="subseg-btn on" id="viewtab-feed" onclick="setViewMode('feed')">📱 피드</button>
+      <button class="subseg-btn" id="viewtab-grid" onclick="setViewMode('grid')">🔲 그리드</button>
     </div>
   </div>
   <div id="timeline-wrap"></div>
@@ -457,6 +474,7 @@ let growthPersonId=null;
 let searchState={q:'',people:[],year:'',season:''};
 let currentUserId=null;
 let signedUrlCache=new Map();
+let viewMode=localStorage.getItem('gallery_view_mode')||'feed';
 
 // ═══════════════════════════════════════════════════════
 // 인증
@@ -591,11 +609,24 @@ function photoThumbHTML(p){
 }
 
 // ═══════════════════════════════════════════════════════
-// 타임라인
+// 타임라인 (피드 / 그리드)
 // ═══════════════════════════════════════════════════════
+function setViewMode(mode){
+  viewMode=mode;
+  localStorage.setItem('gallery_view_mode',mode);
+  document.getElementById('viewtab-feed').classList.toggle('on',mode==='feed');
+  document.getElementById('viewtab-grid').classList.toggle('on',mode==='grid');
+  renderTimeline();
+}
 async function renderTimeline(){
+  document.getElementById('viewtab-feed').classList.toggle('on',viewMode==='feed');
+  document.getElementById('viewtab-grid').classList.toggle('on',viewMode==='grid');
   const wrap=document.getElementById('timeline-wrap');
   if(!PHOTOS.length){wrap.innerHTML=emptyStateHTML();return;}
+  if(viewMode==='feed')await renderFeedView(wrap);
+  else renderGridView(wrap);
+}
+function renderGridView(wrap){
   const groups={};
   PHOTOS.forEach(p=>{const key=`${p.year}-${pad(p.month)}`;(groups[key]=groups[key]||[]).push(p);});
   const keys=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
@@ -605,6 +636,30 @@ async function renderTimeline(){
       <div class="photo-grid">${groups[k].map(photoThumbHTML).join('')}</div></div>`;
   }).join('');
   hydrateThumbs(wrap,PHOTOS);
+}
+function feedCardHTML(p){
+  const firstPerson=p.people[0]?PEOPLE.find(pp=>pp.id===p.people[0]):null;
+  const initial=firstPerson?firstPerson.name.charAt(0):'👪';
+  const names=p.people.length?peopleNames(p.people):'가족';
+  return `<div class="feed-card">
+    <div class="feed-head">
+      <div class="feed-avatar">${escapeHtml(initial)}</div>
+      <div class="feed-headtext">
+        <div class="feed-people">${escapeHtml(names)}</div>
+        <div class="feed-date">${fmtDateKR(p.date)}</div>
+      </div>
+    </div>
+    <div class="feed-imgwrap" onclick="openLightbox('${p.id}')"><img data-path="${p.storage_path}" loading="lazy" alt=""/></div>
+    ${(p.title||p.description)?`<div class="feed-caption">${p.title?`<strong>${escapeHtml(p.title)}</strong>`:''}${p.description?' '+escapeHtml(p.description):''}</div>`:''}
+  </div>`;
+}
+async function renderFeedView(wrap){
+  wrap.innerHTML=`<div class="feed">${PHOTOS.map(feedCardHTML).join('')}</div>`;
+  const paths=PHOTOS.map(p=>p.storage_path);
+  const urls=await getSignedUrls(paths);
+  wrap.querySelectorAll('.feed-imgwrap img[data-path]').forEach(img=>{
+    const u=urls[img.dataset.path];if(u)img.src=u;
+  });
 }
 
 // ═══════════════════════════════════════════════════════
