@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>우리 가족 갤러리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#faf6f0;--card:#ffffff;--card2:#f5efe6;
+  --ink:#2c2620;--ink2:#5b5148;--sub:#948a7e;--sub2:#c3b8a9;
+  --line:#e8ddd0;--line2:#d8cab8;
+  --accent:#c9683f;--accent-soft:rgba(201,104,63,.10);--accent-soft2:rgba(201,104,63,.18);
+  --green:#5f8a5b;--blue:#4a7ba6;--gold:#c99a3f;--red:#c85450;
+  --radius:18px;--radius-s:12px;--radius-xs:8px;
+  --serif:'Noto Serif KR',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+
+.hd{padding:16px 20px 10px;display:flex;align-items:center;justify-content:space-between;background:rgba(250,246,240,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:sticky;top:0;z-index:200;border-bottom:1px solid var(--line)}
+.hd-logo{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.3px;color:var(--ink)}
+.hd-logo span{color:var(--accent)}
+.hd-sub{font-size:11px;color:var(--sub);margin-top:1px}
+
+.nav{display:flex;gap:2px;padding:8px 12px;background:rgba(250,246,240,.94);backdrop-filter:blur(20px);position:sticky;top:56px;z-index:190;border-bottom:1px solid var(--line);overflow-x:auto}
+.nav-btn{flex:1;white-space:nowrap;padding:9px 6px;border:none;background:none;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s}
+.nav-btn.on{background:var(--accent-soft2);color:var(--accent);font-weight:700}
+
+main{flex:1;padding:16px 16px 90px}
+.screen{display:none}.screen.on{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(60,40,20,.06),0 1px 2px rgba(60,40,20,.04)}
+.card-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--sub);margin-bottom:12px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 13px;border-radius:20px;border:1.5px solid var(--line2);background:transparent;color:var(--ink2);font-size:13px;font-family:var(--sans);cursor:pointer;font-weight:500;transition:all .15s}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.chip-add{border-style:dashed;color:var(--sub)}
+.empty-inline{font-size:13px;color:var(--sub);padding:4px 0}
+
+.btn{width:100%;padding:14px;border-radius:var(--radius-s);background:var(--accent);color:#fff;font-family:var(--sans);font-size:15px;font-weight:700;border:none;cursor:pointer;letter-spacing:-.2px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-outline{width:100%;padding:13px;border-radius:var(--radius-s);background:transparent;border:1.5px solid var(--accent);color:var(--accent);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer}
+.btn-s{padding:7px 13px;border-radius:var(--radius-xs);font-size:12.5px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans);background:var(--accent-soft2);color:var(--accent)}
+.btn-s-danger{background:rgba(200,84,80,.1);color:var(--red)}
+
+.stat-row{display:flex;gap:16px;margin-bottom:2px}
+.stat-num{font-size:22px;font-weight:700;color:var(--ink)}
+.stat-lbl{font-size:11px;color:var(--sub)}
+
+/* 사진 그리드 */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px}
+.pgrid-item{position:relative;aspect-ratio:1/1;border-radius:9px;overflow:hidden;cursor:pointer;background:var(--card2)}
+.pgrid-item img{width:100%;height:100%;object-fit:cover;display:block}
+.pgrid-tag{position:absolute;left:0;right:0;bottom:0;padding:4px 6px;font-size:10px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.tl-group{margin-bottom:22px}
+.tl-head{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;padding-left:2px}
+.tl-count{font-size:11px;font-weight:500;color:var(--sub)}
+
+.empty{text-align:center;padding:48px 20px;color:var(--sub);font-size:14px;line-height:2}
+
+/* 검색 */
+.search-input{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:var(--radius-s);color:var(--ink);font-family:var(--sans);font-size:15px;padding:12px 14px;outline:none;margin-bottom:12px}
+.search-input:focus{border-color:var(--accent)}
+.section-label{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin:12px 0 7px}
+.result-count{font-size:12px;color:var(--sub);margin-bottom:8px}
+
+/* 추억 서브탭 */
+.subseg{display:flex;background:var(--card2);border-radius:10px;padding:2px;margin-bottom:14px}
+.subseg-btn{flex:1;padding:8px 4px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}
+.subseg-btn.on{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+input[type=date]{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:var(--radius-s);color:var(--ink);font-family:var(--sans);font-size:15px;padding:11px 14px;outline:none}
+
+/* 성장 앨범 */
+.growth-header{display:flex;gap:10px;margin-bottom:14px}
+.growth-bday{font-size:13px;color:var(--sub);background:var(--card2);padding:6px 12px;border-radius:20px}
+.growth-list{display:flex;flex-direction:column;gap:10px}
+.growth-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius-s);padding:8px;border:1px solid var(--line);cursor:pointer}
+.growth-item img{width:64px;height:64px;object-fit:cover;border-radius:9px;flex-shrink:0}
+.growth-item-date{font-size:13px;font-weight:600;color:var(--ink)}
+.growth-item-age{font-size:12px;color:var(--accent);margin-top:2px;font-weight:600}
+
+/* 추가 화면 */
+.dropzone{border:2px dashed var(--line2);border-radius:var(--radius-s);padding:34px 16px;text-align:center;color:var(--sub);cursor:pointer;transition:all .15s}
+.dropzone.drag{border-color:var(--accent);background:var(--accent-soft)}
+.dropzone-ico{font-size:30px;margin-bottom:8px}
+.pending-card{background:var(--card2);border-radius:var(--radius-s);padding:12px;margin-bottom:10px;display:flex;gap:12px}
+.pending-thumb{width:76px;height:76px;object-fit:cover;border-radius:9px;flex-shrink:0}
+.pending-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.pending-fields input[type=text],.pending-fields input[type=date],.pending-fields textarea{width:100%;background:var(--card);border:1.5px solid var(--line2);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:13px;padding:7px 9px;outline:none}
+.pending-fields textarea{resize:none;font-family:var(--sans)}
+.pending-chips{display:flex;flex-wrap:wrap;gap:5px}
+.pending-chips .chip{padding:4px 10px;font-size:11.5px}
+.pending-rm{align-self:flex-start;background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;line-height:1;padding:2px 4px}
+
+.person-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.person-row:last-child{border-bottom:none}
+.person-name{font-weight:600;font-size:14px;flex:1}
+.person-bday{font-size:12px;color:var(--sub)}
+.add-person-row{display:flex;gap:6px;margin-top:10px}
+.add-person-row input[type=text]{flex:1.4;background:var(--card);border:1.5px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans)}
+.add-person-row input[type=date]{flex:1;padding:8px 10px;font-size:13px}
+
+/* 라이트박스 */
+#lightbox{position:fixed;inset:0;background:rgba(20,15,10,.92);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+#lightbox.on{display:flex}
+.lb-topbar{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:5}
+.lb-icobtn{background:rgba(255,255,255,.14);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lb-imgwrap{max-width:100%;max-height:56vh;display:flex;align-items:center;justify-content:center}
+.lb-img{max-width:100%;max-height:56vh;border-radius:10px;object-fit:contain}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.14);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
+.lb-prev{left:8px}.lb-next{right:8px}
+.lb-panel{width:100%;max-width:520px;background:var(--card);border-radius:var(--radius);padding:16px 18px;margin-top:14px;max-height:32vh;overflow-y:auto}
+.lb-date{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.lb-people{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.lb-people span{font-size:11.5px;background:var(--accent-soft);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:600}
+.lb-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.lb-desc{font-size:13px;color:var(--ink2);line-height:1.7;white-space:pre-wrap}
+.lb-btnrow{display:flex;gap:8px;margin-top:12px}
+.lb-btnrow .btn-s{flex:1;text-align:center;padding:9px}
+.lb-edit input[type=text],.lb-edit input[type=date],.lb-edit textarea{width:100%;background:var(--card2);border:1.5px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:13px;font-family:var(--sans);margin-bottom:8px;outline:none}
+.lb-edit textarea{resize:none;min-height:60px}
+.lb-edit-label{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px}
+
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#2c2620;color:#fff;padding:11px 20px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:600;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.err{background:var(--red)}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+@media(max-width:420px){.pending-thumb,.growth-item img{width:56px;height:56px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div class="hd">
+  <div>
+    <div class="hd-logo">우리<span>家族</span></div>
+    <div class="hd-sub">가족의 순간들을 시간 속에 담다</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn on" data-screen="timeline" onclick="showScreen('timeline')">🕰 타임라인</button>
+  <button class="nav-btn" data-screen="search" onclick="showScreen('search')">🔍 검색</button>
+  <button class="nav-btn" data-screen="memories" onclick="showScreen('memories')">✨ 추억</button>
+  <button class="nav-btn" data-screen="growth" onclick="showScreen('growth')">🌱 성장</button>
+  <button class="nav-btn" data-screen="add" onclick="showScreen('add')">➕ 추가</button>
+</div>
+
+<main>
+
+<!-- 타임라인 -->
+<div id="sc-timeline" class="screen on">
+  <div class="card">
+    <div class="stat-row">
+      <div><div class="stat-num" id="stat-photos">0</div><div class="stat-lbl">장의 사진</div></div>
+      <div><div class="stat-num" id="stat-people">0</div><div class="stat-lbl">명의 가족</div></div>
+      <div><div class="stat-num" id="stat-years">0</div><div class="stat-lbl">년의 기록</div></div>
+    </div>
+  </div>
+  <div id="timeline-wrap"></div>
+</div>
+
+<!-- 검색 -->
+<div id="sc-search" class="screen">
+  <div class="card">
+    <input type="text" class="search-input" id="search-q" placeholder="제목, 설명으로 검색..." oninput="onSearchQuery(this.value)"/>
+    <div class="section-label">가족 구성원</div>
+    <div class="chips" id="search-people-chips"></div>
+    <div class="section-label">연도</div>
+    <div class="chips" id="search-year-chips"></div>
+    <div class="section-label">계절</div>
+    <div class="chips" id="search-season-chips">
+      <button class="chip" data-s="" onclick="setSearchSeason('')">전체</button>
+      <button class="chip" data-s="봄" onclick="setSearchSeason('봄')">🌸 봄</button>
+      <button class="chip" data-s="여름" onclick="setSearchSeason('여름')">☀️ 여름</button>
+      <button class="chip" data-s="가을" onclick="setSearchSeason('가을')">🍁 가을</button>
+      <button class="chip" data-s="겨울" onclick="setSearchSeason('겨울')">❄️ 겨울</button>
+    </div>
+  </div>
+  <div id="search-results"></div>
+</div>
+
+<!-- 추억 -->
+<div id="sc-memories" class="screen">
+  <div class="card">
+    <div class="subseg">
+      <button class="subseg-btn on" id="memtab-today" onclick="setMemTab('today')">📅 그날의 오늘</button>
+      <button class="subseg-btn" id="memtab-season" onclick="setMemTab('season')">🍂 계절별</button>
+    </div>
+    <div id="mem-today-controls">
+      <input type="date" id="mem-date" onchange="renderOnThisDay(this.value)"/>
+    </div>
+    <div id="mem-season-controls" style="display:none">
+      <div class="chips">
+        <button class="chip" data-s="봄" onclick="setMemSeason('봄')">🌸 봄</button>
+        <button class="chip" data-s="여름" onclick="setMemSeason('여름')">☀️ 여름</button>
+        <button class="chip" data-s="가을" onclick="setMemSeason('가을')">🍁 가을</button>
+        <button class="chip" data-s="겨울" onclick="setMemSeason('겨울')">❄️ 겨울</button>
+      </div>
+    </div>
+  </div>
+  <div id="memories-content"></div>
+</div>
+
+<!-- 성장 -->
+<div id="sc-growth" class="screen">
+  <div class="card">
+    <div class="card-label">가족 선택</div>
+    <div class="chips" id="growth-people-chips"></div>
+  </div>
+  <div id="growth-content"></div>
+</div>
+
+<!-- 추가 -->
+<div id="sc-add" class="screen">
+  <div class="card">
+    <div class="card-label">사진 업로드</div>
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+      <div class="dropzone-ico">📷</div>
+      <div>탭하거나 사진을 끌어다 놓으세요</div>
+      <div style="font-size:12px;margin-top:4px;color:var(--sub2)">여러 장을 한 번에 선택할 수 있어요 (촬영일 자동 인식)</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none"/>
+  </div>
+  <div id="pending-list"></div>
+  <div class="card" id="pending-save-card" style="display:none">
+    <button class="btn" onclick="saveAllPending()">모두 저장하기</button>
+  </div>
+
+  <div class="card">
+    <div class="card-label">가족 구성원 관리</div>
+    <div id="people-manage-list"></div>
+    <div class="add-person-row">
+      <input type="text" id="new-person-name" placeholder="이름"/>
+      <input type="date" id="new-person-bday"/>
+      <button class="btn-s" onclick="addPersonForm()">추가</button>
+    </div>
+    <div style="font-size:11.5px;color:var(--sub);margin-top:8px">생일을 등록하면 성장 앨범에 나이가 함께 표시돼요</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">백업 · 복원</div>
+    <div style="font-size:12.5px;color:var(--sub);margin-bottom:12px;line-height:1.7">사진은 이 브라우저에만 저장돼요. 다른 기기로 옮기거나 안전하게 보관하려면 백업 파일을 내려받으세요.</div>
+    <div class="btn-row" style="display:flex;gap:8px">
+      <button class="btn-outline" style="flex:1" onclick="exportBackup()">⬇ 백업 내보내기</button>
+      <button class="btn-outline" style="flex:1" onclick="document.getElementById('import-input').click()">⬆ 복원하기</button>
+    </div>
+    <input type="file" id="import-input" accept="application/json" style="display:none"/>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- 라이트박스 -->
+<div id="lightbox">
+  <div class="lb-topbar">
+    <button class="lb-icobtn" onclick="closeLightbox()">✕</button>
+    <div style="display:flex;gap:8px">
+      <button class="lb-icobtn" onclick="toggleLbEdit()">✏️</button>
+      <button class="lb-icobtn" onclick="deleteCurrentPhoto()">🗑</button>
+    </div>
+  </div>
+  <button class="lb-nav lb-prev" onclick="lbStep(-1)">‹</button>
+  <button class="lb-nav lb-next" onclick="lbStep(1)">›</button>
+  <div class="lb-imgwrap"><img class="lb-img" id="lb-img" alt=""/></div>
+  <div class="lb-panel" id="lb-panel-view">
+    <div class="lb-date" id="lb-date"></div>
+    <div class="lb-people" id="lb-people"></div>
+    <div class="lb-title" id="lb-title"></div>
+    <div class="lb-desc" id="lb-desc"></div>
+  </div>
+  <div class="lb-panel lb-edit" id="lb-panel-edit" style="display:none">
+    <div class="lb-edit-label">날짜</div>
+    <input type="date" id="lb-edit-date"/>
+    <div class="lb-edit-label">제목</div>
+    <input type="text" id="lb-edit-title" placeholder="제목 (선택)"/>
+    <div class="lb-edit-label">설명</div>
+    <textarea id="lb-edit-desc" placeholder="설명 (선택)"></textarea>
+    <div class="lb-edit-label">가족 태그</div>
+    <div class="chips" id="lb-edit-people"></div>
+    <div class="lb-btnrow">
+      <button class="btn-s" style="background:var(--accent);color:#fff" onclick="saveLbEdit()">저장</button>
+      <button class="btn-s" onclick="toggleLbEdit()">취소</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// IndexedDB
+// ═══════════════════════════════════════════════════════
+let dbInstance=null;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    if(dbInstance)return resolve(dbInstance);
+    const req=indexedDB.open('familyGalleryDB',1);
+    req.onupgradeneeded=(e)=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('photos'))db.createObjectStore('photos',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('blobs'))db.createObjectStore('blobs',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('people'))db.createObjectStore('people',{keyPath:'id'});
+    };
+    req.onsuccess=()=>{dbInstance=req.result;resolve(dbInstance);};
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function dbGetAll(store){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const req=db.transaction(store,'readonly').objectStore(store).getAll();
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+}
+async function dbGet(store,id){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const req=db.transaction(store,'readonly').objectStore(store).get(id);
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+}
+async function dbPut(store,obj){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(obj);
+    tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
+  });
+}
+async function dbDelete(store,id){
+  const db=await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id);
+    tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 유틸
+// ═══════════════════════════════════════════════════════
+function pad(n){return String(n).padStart(2,'0');}
+function fmtDateISO(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function todayStr(){return fmtDateISO(new Date());}
+function seasonOf(month){if([3,4,5].includes(month))return '봄';if([6,7,8].includes(month))return '여름';if([9,10,11].includes(month))return '가을';return '겨울';}
+function fmtDateKR(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  const days=['일','월','화','수','목','금','토'];
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function peopleNames(ids){return ids.map(id=>PEOPLE.find(pp=>pp.id===id)?.name).filter(Boolean).join(', ');}
+function emptyStateHTML(msg){return `<div class="empty">${msg||'아직 사진이 없어요<br>➕ 추가 탭에서 첫 사진을 올려보세요'}</div>`;}
+function computeAge(birth,target){
+  const b=new Date(birth+'T00:00:00'),t=new Date(target+'T00:00:00');
+  if(isNaN(b)||isNaN(t)||t<b)return '';
+  let years=t.getFullYear()-b.getFullYear(),months=t.getMonth()-b.getMonth(),days=t.getDate()-b.getDate();
+  if(days<0)months--;
+  if(months<0){years--;months+=12;}
+  if(years<1){
+    if(months<1){const diffDays=Math.max(0,Math.round((t-b)/86400000));return `생후 ${diffDays}일`;}
+    return `생후 ${months}개월`;
+  }
+  return months>0?`${years}세 ${months}개월`:`${years}세`;
+}
+function showToast(msg,isErr){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=isErr?'show err':'show';
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ═══════════════════════════════════════════════════════
+// EXIF 촬영일 추출 (JPEG)
+// ═══════════════════════════════════════════════════════
+async function readExifDate(file){
+  try{
+    const buf=await file.slice(0,131072).arrayBuffer();
+    const view=new DataView(buf);
+    if(view.getUint16(0)!==0xFFD8)return null;
+    let offset=2;
+    while(offset+4<view.byteLength){
+      const marker=view.getUint16(offset);
+      if((marker&0xFF00)!==0xFF00)break;
+      if(marker===0xFFD8){offset+=2;continue;}
+      if(marker===0xFFDA)break;
+      const segLen=view.getUint16(offset+2);
+      if(marker===0xFFE1){
+        const exifStart=offset+4;
+        if(exifStart+6<view.byteLength && view.getUint32(exifStart)===0x45786966){
+          const tiffOffset=exifStart+6;
+          const little=view.getUint16(tiffOffset)===0x4949;
+          const get16=(o)=>view.getUint16(o,little);
+          const get32=(o)=>view.getUint32(o,little);
+          const ifd0=tiffOffset+get32(tiffOffset+4);
+          const numEntries=get16(ifd0);
+          let exifIFDOffset=null;
+          for(let i=0;i<numEntries;i++){
+            const eo=ifd0+2+i*12;
+            if(get16(eo)===0x8769){exifIFDOffset=tiffOffset+get32(eo+8);break;}
+          }
+          if(exifIFDOffset!=null){
+            const exifEntries=get16(exifIFDOffset);
+            for(let i=0;i<exifEntries;i++){
+              const eo=exifIFDOffset+2+i*12;
+              const tag=get16(eo);
+              if(tag===0x9003||tag===0x9004){
+                const count=get32(eo+4);
+                const valOffset=tiffOffset+get32(eo+8);
+                let str='';
+                for(let j=0;j<count-1 && valOffset+j<view.byteLength;j++)str+=String.fromCharCode(view.getUint8(valOffset+j));
+                const m=str.match(/^(\d{4}):(\d{2}):(\d{2})/);
+                if(m)return `${m[1]}-${m[2]}-${m[3]}`;
+              }
+            }
+          }
+        }
+      }
+      offset+=2+segLen;
+    }
+  }catch(e){return null;}
+  return null;
+}
+function makeThumb(file){
+  return new Promise((resolve)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const maxDim=480;
+      let w=img.width,h=img.height;
+      const scale=Math.min(1,maxDim/Math.max(w,h));
+      w=Math.round(w*scale)||1;h=Math.round(h*scale)||1;
+      const cvs=document.createElement('canvas');cvs.width=w;cvs.height=h;
+      cvs.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      resolve(cvs.toDataURL('image/jpeg',0.72));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve('');};
+    img.src=url;
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 상태
+// ═══════════════════════════════════════════════════════
+let PHOTOS=[],PEOPLE=[],PENDING=[];
+let activeGridList=[];
+let lightboxIdx=-1,lastLbUrl=null;
+let memTab='today',memSeason='봄';
+let growthPersonId=null;
+let searchState={q:'',people:[],year:'',season:''};
+
+async function init(){
+  try{
+    const photosRaw=await dbGetAll('photos');
+    PHOTOS=photosRaw.map(p=>({id:p.id,date:p.date,year:p.year,month:p.month,day:p.day,season:p.season,title:p.title||'',desc:p.desc||'',people:p.people||[],thumb:p.thumb,addedAt:p.addedAt||0}))
+      .sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
+    PEOPLE=await dbGetAll('people');
+  }catch(e){console.error(e);showToast('저장소를 여는 중 문제가 발생했어요',true);}
+  document.getElementById('mem-date').value=todayStr();
+  showScreen('timeline');
+}
+
+// ═══════════════════════════════════════════════════════
+// 화면 전환
+// ═══════════════════════════════════════════════════════
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sc-'+name).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('on',b.dataset.screen===name));
+  if(name==='timeline'){activeGridList=PHOTOS;renderTimeline();renderStats();}
+  else if(name==='search'){renderSearchFilters();performSearch();}
+  else if(name==='memories'){renderMemories();}
+  else if(name==='growth'){renderGrowthPeopleChips();renderGrowthTimeline();}
+  else if(name==='add'){renderPending();renderPeopleManage();}
+}
+
+function renderStats(){
+  document.getElementById('stat-photos').textContent=PHOTOS.length;
+  document.getElementById('stat-people').textContent=PEOPLE.length;
+  document.getElementById('stat-years').textContent=new Set(PHOTOS.map(p=>p.year)).size;
+}
+
+// ═══════════════════════════════════════════════════════
+// 사진 그리드 조각
+// ═══════════════════════════════════════════════════════
+function photoThumbHTML(p){
+  return `<div class="pgrid-item" onclick="openLightbox('${p.id}')">
+    <img src="${p.thumb}" loading="lazy" alt=""/>
+    ${p.people.length?`<div class="pgrid-tag">${escapeHtml(peopleNames(p.people))}</div>`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// 타임라인
+// ═══════════════════════════════════════════════════════
+function renderTimeline(){
+  const wrap=document.getElementById('timeline-wrap');
+  if(!PHOTOS.length){wrap.innerHTML=emptyStateHTML();return;}
+  const groups={};
+  PHOTOS.forEach(p=>{const key=`${p.year}-${pad(p.month)}`;(groups[key]=groups[key]||[]).push(p);});
+  const keys=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+  wrap.innerHTML=keys.map(k=>{
+    const [y,m]=k.split('-');
+    return `<div class="tl-group"><div class="tl-head">${y}년 ${parseInt(m)}월 <span class="tl-count">${groups[k].length}장</span></div>
+      <div class="photo-grid">${groups[k].map(photoThumbHTML).join('')}</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// 검색
+// ═══════════════════════════════════════════════════════
+function renderSearchFilters(){
+  document.getElementById('search-people-chips').innerHTML=PEOPLE.length?PEOPLE.map(p=>
+    `<button class="chip ${searchState.people.includes(p.id)?'on':''}" onclick="toggleSearchPerson('${p.id}')">${escapeHtml(p.name)}</button>`).join('')
+    :'<span class="empty-inline">등록된 가족이 없어요</span>';
+  const years=[...new Set(PHOTOS.map(p=>p.year))].sort((a,b)=>b-a);
+  document.getElementById('search-year-chips').innerHTML=
+    `<button class="chip ${searchState.year===''?'on':''}" onclick="setSearchYear('')">전체</button>`+
+    years.map(y=>`<button class="chip ${searchState.year===y?'on':''}" onclick="setSearchYear(${y})">${y}</button>`).join('');
+  document.querySelectorAll('#search-season-chips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===searchState.season));
+}
+function onSearchQuery(v){searchState.q=v;performSearch();}
+function toggleSearchPerson(id){
+  const pos=searchState.people.indexOf(id);
+  if(pos>=0)searchState.people.splice(pos,1);else searchState.people.push(id);
+  renderSearchFilters();performSearch();
+}
+function setSearchYear(y){searchState.year=y;renderSearchFilters();performSearch();}
+function setSearchSeason(s){searchState.season=s;renderSearchFilters();performSearch();}
+function performSearch(){
+  const q=searchState.q.trim().toLowerCase();
+  const list=PHOTOS.filter(p=>{
+    if(q&&!((p.title||'').toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q)))return false;
+    if(searchState.people.length&&!searchState.people.every(pid=>p.people.includes(pid)))return false;
+    if(searchState.year!==''&&p.year!==searchState.year)return false;
+    if(searchState.season&&p.season!==searchState.season)return false;
+    return true;
+  });
+  activeGridList=list;
+  document.getElementById('search-results').innerHTML=list.length?
+    `<div class="result-count">${list.length}장</div><div class="photo-grid">${list.map(photoThumbHTML).join('')}</div>`
+    :emptyStateHTML('검색 결과가 없어요');
+}
+
+// ═══════════════════════════════════════════════════════
+// 추억 (그날의 오늘 / 계절별)
+// ═══════════════════════════════════════════════════════
+function setMemTab(tab){
+  memTab=tab;
+  document.getElementById('memtab-today').classList.toggle('on',tab==='today');
+  document.getElementById('memtab-season').classList.toggle('on',tab==='season');
+  document.getElementById('mem-today-controls').style.display=tab==='today'?'':'none';
+  document.getElementById('mem-season-controls').style.display=tab==='season'?'':'none';
+  renderMemories();
+}
+function setMemSeason(s){
+  memSeason=s;
+  document.querySelectorAll('#mem-season-controls .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s));
+  renderMemories();
+}
+function renderMemories(){
+  if(memTab==='today'){
+    document.querySelectorAll('#mem-season-controls .chip').forEach(c=>c.classList.remove('on'));
+    renderOnThisDay(document.getElementById('mem-date').value||todayStr());
+  }else{
+    document.querySelectorAll('#mem-season-controls .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===memSeason));
+    renderSeason(memSeason);
+  }
+}
+function renderOnThisDay(dateStr){
+  const d=new Date(dateStr+'T00:00:00');
+  if(isNaN(d))return;
+  const mm=pad(d.getMonth()+1),dd=pad(d.getDate());
+  const matches=PHOTOS.filter(p=>pad(p.month)===mm&&pad(p.day)===dd).sort((a,b)=>b.year-a.year);
+  activeGridList=matches;
+  const el=document.getElementById('memories-content');
+  if(!matches.length){el.innerHTML=emptyStateHTML(`${parseInt(mm)}월 ${parseInt(dd)}일에 찍은 사진이 없어요<br>다른 날짜를 골라보세요`);return;}
+  const byYear={};matches.forEach(p=>(byYear[p.year]=byYear[p.year]||[]).push(p));
+  const years=Object.keys(byYear).sort((a,b)=>b-a);
+  const thisYear=new Date().getFullYear();
+  el.innerHTML=years.map(y=>{
+    const diff=thisYear-parseInt(y);
+    return `<div class="tl-group"><div class="tl-head">${y}년 <span class="tl-count">${diff===0?'올해':diff+'년 전'}</span></div>
+      <div class="photo-grid">${byYear[y].map(photoThumbHTML).join('')}</div></div>`;
+  }).join('');
+}
+function renderSeason(season){
+  const matches=PHOTOS.filter(p=>p.season===season).sort((a,b)=>b.date.localeCompare(a.date));
+  activeGridList=matches;
+  const el=document.getElementById('memories-content');
+  if(!matches.length){el.innerHTML=emptyStateHTML(`${season} 사진이 아직 없어요`);return;}
+  const byYear={};matches.forEach(p=>(byYear[p.year]=byYear[p.year]||[]).push(p));
+  const years=Object.keys(byYear).sort((a,b)=>b-a);
+  el.innerHTML=years.map(y=>`<div class="tl-group"><div class="tl-head">${y}년 ${season}</div>
+    <div class="photo-grid">${byYear[y].map(photoThumbHTML).join('')}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// 성장 앨범
+// ═══════════════════════════════════════════════════════
+function renderGrowthPeopleChips(){
+  const el=document.getElementById('growth-people-chips');
+  if(!PEOPLE.length){el.innerHTML='<span class="empty-inline">➕ 추가 탭에서 가족을 먼저 등록해주세요</span>';return;}
+  el.innerHTML=PEOPLE.map(p=>`<button class="chip ${growthPersonId===p.id?'on':''}" onclick="selectGrowthPerson('${p.id}')">${escapeHtml(p.name)}</button>`).join('');
+}
+function selectGrowthPerson(id){growthPersonId=id;renderGrowthPeopleChips();renderGrowthTimeline();}
+function renderGrowthTimeline(){
+  const el=document.getElementById('growth-content');
+  if(!growthPersonId){el.innerHTML=emptyStateHTML('가족을 선택하면 시간에 따라 변해온 모습을 볼 수 있어요');return;}
+  const person=PEOPLE.find(p=>p.id===growthPersonId);
+  if(!person){growthPersonId=null;el.innerHTML=emptyStateHTML();return;}
+  const matches=PHOTOS.filter(p=>p.people.includes(growthPersonId)).sort((a,b)=>a.date.localeCompare(b.date));
+  activeGridList=matches;
+  if(!matches.length){el.innerHTML=emptyStateHTML(`${escapeHtml(person.name)}의 사진이 아직 없어요`);return;}
+  el.innerHTML=`<div class="growth-header">${person.birthdate?`<span class="growth-bday">🎂 ${person.birthdate} 생</span>`:'<span class="growth-bday">생일 미등록</span>'}</div>
+    <div class="growth-list">${matches.map(p=>{
+      const age=person.birthdate?computeAge(person.birthdate,p.date):'';
+      return `<div class="growth-item" onclick="openLightbox('${p.id}')">
+        <img src="${p.thumb}"/>
+        <div><div class="growth-item-date">${fmtDateKR(p.date)}</div>${age?`<div class="growth-item-age">${age}</div>`:''}${p.title?`<div style="font-size:12px;color:var(--ink2);margin-top:2px">${escapeHtml(p.title)}</div>`:''}</div>
+      </div>`;
+    }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// 업로드 (추가)
+// ═══════════════════════════════════════════════════════
+const fileInput=document.getElementById('file-input');
+fileInput.addEventListener('change',e=>handleFiles(e.target.files));
+const dropzone=document.getElementById('dropzone');
+['dragover','dragenter'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove('drag');}));
+dropzone.addEventListener('drop',e=>{if(e.dataTransfer.files)handleFiles(e.dataTransfer.files);});
+
+async function handleFiles(fileList){
+  const files=Array.from(fileList).filter(f=>f.type.startsWith('image/'));
+  if(!files.length)return;
+  for(const file of files){
+    const id='ph_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    let dateStr=await readExifDate(file);
+    if(!dateStr){
+      const lm=new Date(file.lastModified);
+      dateStr=isNaN(lm)?todayStr():fmtDateISO(lm);
+    }
+    const thumb=await makeThumb(file);
+    PENDING.push({id,file,thumb,date:dateStr,title:'',desc:'',people:[]});
+  }
+  renderPending();
+  fileInput.value='';
+}
+
+function renderPending(){
+  const list=document.getElementById('pending-list');
+  const saveCard=document.getElementById('pending-save-card');
+  if(!PENDING.length){list.innerHTML='';saveCard.style.display='none';return;}
+  saveCard.style.display='';
+  list.innerHTML=PENDING.map((item,idx)=>`
+    <div class="pending-card" data-id="${item.id}">
+      <img class="pending-thumb" src="${item.thumb}"/>
+      <div class="pending-fields">
+        <input type="date" value="${item.date}" onchange="updatePending('${item.id}','date',this.value)"/>
+        <input type="text" placeholder="제목 (선택)" value="${escapeHtml(item.title)}" oninput="updatePending('${item.id}','title',this.value)"/>
+        <textarea rows="2" placeholder="설명 (선택)" oninput="updatePending('${item.id}','desc',this.value)">${escapeHtml(item.desc)}</textarea>
+        <div class="chips pending-chips">${PEOPLE.map(p=>`<button type="button" class="chip ${item.people.includes(p.id)?'on':''}" onclick="togglePendingPerson('${item.id}','${p.id}')">${escapeHtml(p.name)}</button>`).join('')}<button type="button" class="chip chip-add" onclick="quickAddPersonForPending('${item.id}')">+ 새 가족</button></div>
+      </div>
+      <button class="pending-rm" onclick="removePending('${item.id}')">✕</button>
+    </div>`).join('');
+}
+function updatePending(id,field,value){const it=PENDING.find(p=>p.id===id);if(it)it[field]=value;}
+function togglePendingPerson(id,pid){
+  const it=PENDING.find(p=>p.id===id);if(!it)return;
+  const pos=it.people.indexOf(pid);
+  if(pos>=0)it.people.splice(pos,1);else it.people.push(pid);
+  renderPending();
+}
+function quickAddPersonForPending(id){
+  const person=quickAddPerson();
+  if(!person)return;
+  const it=PENDING.find(p=>p.id===id);if(it)it.people.push(person.id);
+  renderPending();
+}
+function removePending(id){PENDING=PENDING.filter(p=>p.id!==id);renderPending();}
+
+function quickAddPerson(){
+  const name=prompt('가족 이름을 입력하세요');
+  if(!name||!name.trim())return null;
+  const bd=prompt('생일 (선택, 예: 2020-05-14) 모르면 취소를 누르세요')||'';
+  const person={id:'pp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name:name.trim(),birthdate:/^\d{4}-\d{2}-\d{2}$/.test(bd.trim())?bd.trim():''};
+  PEOPLE.push(person);dbPut('people',person);
+  renderPeopleManage();
+  return person;
+}
+
+async function saveAllPending(){
+  if(!PENDING.length)return;
+  for(const item of PENDING){
+    const d=new Date(item.date+'T00:00:00');
+    if(isNaN(d)){showToast('날짜를 확인해주세요',true);return;}
+    const meta={id:item.id,date:item.date,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),title:item.title.trim(),desc:item.desc.trim(),people:item.people.slice(),thumb:item.thumb,addedAt:Date.now()};
+    await dbPut('photos',meta);
+    await dbPut('blobs',{id:item.id,blob:item.file});
+    PHOTOS.push({...meta});
+  }
+  PENDING=[];
+  PHOTOS.sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
+  renderPending();
+  showToast('사진이 저장되었어요');
+  showScreen('timeline');
+}
+
+// ═══════════════════════════════════════════════════════
+// 가족 구성원 관리
+// ═══════════════════════════════════════════════════════
+function renderPeopleManage(){
+  const el=document.getElementById('people-manage-list');
+  el.innerHTML=PEOPLE.length?PEOPLE.map(p=>`<div class="person-row">
+    <span class="person-name">${escapeHtml(p.name)}</span>
+    <span class="person-bday">${p.birthdate||'생일 미등록'}</span>
+    <button class="btn-s btn-s-danger" onclick="deletePerson('${p.id}')">삭제</button>
+  </div>`).join(''):'<div class="empty-inline">등록된 가족이 없어요</div>';
+}
+function addPersonForm(){
+  const nameEl=document.getElementById('new-person-name'),bdEl=document.getElementById('new-person-bday');
+  const name=nameEl.value.trim();if(!name)return;
+  const person={id:'pp_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name,birthdate:bdEl.value||''};
+  PEOPLE.push(person);dbPut('people',person);
+  nameEl.value='';bdEl.value='';
+  renderPeopleManage();renderPending();
+}
+async function deletePerson(id){
+  if(!confirm('이 가족 구성원을 삭제할까요? 사진에서도 태그가 제거돼요.'))return;
+  PEOPLE=PEOPLE.filter(p=>p.id!==id);
+  await dbDelete('people',id);
+  for(const p of PHOTOS){
+    if(p.people.includes(id)){
+      p.people=p.people.filter(x=>x!==id);
+      await dbPut('photos',{...p});
+    }
+  }
+  if(growthPersonId===id)growthPersonId=null;
+  renderPeopleManage();renderPending();
+}
+
+// ═══════════════════════════════════════════════════════
+// 라이트박스
+// ═══════════════════════════════════════════════════════
+async function openLightbox(id){
+  const idx=activeGridList.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  lightboxIdx=idx;
+  document.getElementById('lightbox').classList.add('on');
+  document.getElementById('lb-panel-edit').style.display='none';
+  document.getElementById('lb-panel-view').style.display='';
+  await renderLightbox();
+}
+async function renderLightbox(){
+  const p=activeGridList[lightboxIdx];
+  if(!p)return closeLightbox();
+  if(lastLbUrl){URL.revokeObjectURL(lastLbUrl);lastLbUrl=null;}
+  const img=document.getElementById('lb-img');
+  img.src=p.thumb;
+  try{
+    const rec=await dbGet('blobs',p.id);
+    if(rec&&rec.blob){lastLbUrl=URL.createObjectURL(rec.blob);img.src=lastLbUrl;}
+  }catch(e){}
+  document.getElementById('lb-date').textContent=fmtDateKR(p.date);
+  document.getElementById('lb-people').innerHTML=p.people.map(pid=>{
+    const person=PEOPLE.find(pp=>pp.id===pid);return person?`<span>${escapeHtml(person.name)}</span>`:'';
+  }).join('');
+  document.getElementById('lb-title').textContent=p.title||'';
+  document.getElementById('lb-title').style.display=p.title?'':'none';
+  document.getElementById('lb-desc').textContent=p.desc||'';
+  document.getElementById('lb-desc').style.display=p.desc?'':'none';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('on');
+  if(lastLbUrl){URL.revokeObjectURL(lastLbUrl);lastLbUrl=null;}
+}
+function lbStep(dir){
+  const ni=lightboxIdx+dir;
+  if(ni<0||ni>=activeGridList.length)return;
+  lightboxIdx=ni;
+  document.getElementById('lb-panel-edit').style.display='none';
+  document.getElementById('lb-panel-view').style.display='';
+  renderLightbox();
+}
+function toggleLbEdit(){
+  const view=document.getElementById('lb-panel-view'),edit=document.getElementById('lb-panel-edit');
+  const opening=edit.style.display==='none';
+  if(opening){
+    const p=activeGridList[lightboxIdx];
+    document.getElementById('lb-edit-date').value=p.date;
+    document.getElementById('lb-edit-title').value=p.title||'';
+    document.getElementById('lb-edit-desc').value=p.desc||'';
+    document.getElementById('lb-edit-people').innerHTML=PEOPLE.map(pp=>
+      `<button type="button" class="chip ${p.people.includes(pp.id)?'on':''}" data-pid="${pp.id}" onclick="this.classList.toggle('on')">${escapeHtml(pp.name)}</button>`).join('')
+      +`<button type="button" class="chip chip-add" onclick="quickAddPersonForLbEdit()">+ 새 가족</button>`;
+    view.style.display='none';edit.style.display='';
+  }else{
+    edit.style.display='none';view.style.display='';
+  }
+}
+function quickAddPersonForLbEdit(){
+  const person=quickAddPerson();
+  if(!person)return;
+  toggleLbEdit();toggleLbEdit();
+  document.querySelector(`#lb-edit-people [data-pid="${person.id}"]`)?.classList.add('on');
+}
+async function saveLbEdit(){
+  const p=activeGridList[lightboxIdx];if(!p)return;
+  const dateVal=document.getElementById('lb-edit-date').value;
+  const d=new Date(dateVal+'T00:00:00');
+  if(isNaN(d)){showToast('날짜를 확인해주세요',true);return;}
+  const selectedPeople=[...document.querySelectorAll('#lb-edit-people .chip.on')].map(c=>c.dataset.pid).filter(Boolean);
+  const updated={...p,date:dateVal,year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate(),season:seasonOf(d.getMonth()+1),
+    title:document.getElementById('lb-edit-title').value.trim(),
+    desc:document.getElementById('lb-edit-desc').value.trim(),
+    people:selectedPeople};
+  await dbPut('photos',updated);
+  const gi=PHOTOS.findIndex(x=>x.id===p.id);if(gi>=0)PHOTOS[gi]=updated;
+  const ai=activeGridList.findIndex(x=>x.id===p.id);if(ai>=0)activeGridList[ai]=updated;
+  PHOTOS.sort((a,b)=>b.date.localeCompare(a.date)||b.addedAt-a.addedAt);
+  toggleLbEdit();
+  await renderLightbox();
+  reRenderCurrentGridScreen();
+  showToast('수정되었어요');
+}
+async function deleteCurrentPhoto(){
+  const p=activeGridList[lightboxIdx];if(!p)return;
+  if(!confirm('이 사진을 삭제할까요?'))return;
+  await dbDelete('photos',p.id);
+  await dbDelete('blobs',p.id);
+  PHOTOS=PHOTOS.filter(x=>x.id!==p.id);
+  activeGridList=activeGridList.filter(x=>x.id!==p.id);
+  if(!activeGridList.length){closeLightbox();}
+  else{lightboxIdx=Math.min(lightboxIdx,activeGridList.length-1);await renderLightbox();}
+  reRenderCurrentGridScreen();
+  showToast('삭제되었어요');
+}
+function reRenderCurrentGridScreen(){
+  const active=document.querySelector('.nav-btn.on')?.dataset.screen;
+  if(active==='timeline'){renderTimeline();renderStats();}
+  else if(active==='search')performSearch();
+  else if(active==='memories')renderMemories();
+  else if(active==='growth')renderGrowthTimeline();
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lightbox').classList.contains('on'))return;
+  if(e.key==='Escape')closeLightbox();
+  if(e.key==='ArrowLeft')lbStep(-1);
+  if(e.key==='ArrowRight')lbStep(1);
+});
+
+// ═══════════════════════════════════════════════════════
+// 백업 · 복원
+// ═══════════════════════════════════════════════════════
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);r.onerror=reject;
+    r.readAsDataURL(blob);
+  });
+}
+async function exportBackup(){
+  try{
+    const photos=await dbGetAll('photos');
+    const blobs=await dbGetAll('blobs');
+    const people=await dbGetAll('people');
+    const blobMap={};
+    for(const b of blobs)blobMap[b.id]=await blobToBase64(b.blob);
+    const data={version:1,exportedAt:new Date().toISOString(),people,photos,blobs:blobMap};
+    const jsonBlob=new Blob([JSON.stringify(data)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(jsonBlob);
+    a.download=`family-gallery-backup-${todayStr()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('백업 파일을 내려받았어요');
+  }catch(e){showToast('백업 실패: '+e.message,true);}
+}
+document.getElementById('import-input').addEventListener('change',e=>{
+  const file=e.target.files[0];
+  if(file)importBackupFile(file);
+  e.target.value='';
+});
+async function importBackupFile(file){
+  try{
+    const text=await file.text();
+    const data=JSON.parse(text);
+    if(!data.photos)throw new Error('형식이 올바르지 않아요');
+    for(const person of (data.people||[]))await dbPut('people',person);
+    for(const meta of data.photos)await dbPut('photos',meta);
+    for(const [id,dataUrl] of Object.entries(data.blobs||{})){
+      const blob=await (await fetch(dataUrl)).blob();
+      await dbPut('blobs',{id,blob});
+    }
+    await init();
+    showToast('복원이 완료되었어요');
+  }catch(e){showToast('복원 실패: '+e.message,true);}
+}
+
+window.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
